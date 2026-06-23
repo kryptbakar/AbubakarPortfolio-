@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Muhammad Abubakar — Cyber Security Engineer</title>
+
+  <meta name="description" content="Muhammad Abubakar — final-year Cyber Security engineer at GIKI. AppSec, DevSecOps, and ML-driven security. Selected work: VYREX air-gapped SOC, DQN artificial-noise allocation, Phantom Identity, and more." />
+  <meta name="author" content="Muhammad Abubakar" />
+  <meta name="theme-color" content="#0a0a0c" />
+  <link rel="canonical" href="https://kryptbakar.github.io/Portfolio-/" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Muhammad Abubakar — Cyber Security Engineer" />
+  <meta property="og:description" content="AppSec · DevSecOps · ML Security. Final-year Cyber Security engineer at GIKI, Pakistan." />
+  <meta property="og:image" content="assets/img/og.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Muhammad Abubakar — Cyber Security Engineer" />
+  <meta name="twitter:description" content="AppSec · DevSecOps · ML Security. Selected security work and research." />
+  <meta name="twitter:image" content="assets/img/og.svg" />
+
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,500&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <noscript><style>
+    #loader { display: none !important; }
+    [data-fade] { opacity: 1 !important; transform: none !important; }
+    .hero__title .line__in, [data-split] .split-line > span { transform: none !important; }
+    .manifesto__text .w { opacity: 1 !important; }
+  </style></noscript>
+</head>
+<body>
+  <a class="skip-link" href="#work">Skip to work</a>
+
+  <!-- ░░ FILM GRAIN + VIGNETTE ░░ -->
+  <div class="grain" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <!-- ░░ CUSTOM CURSOR ░░ -->
+  <div class="cursor" aria-hidden="true">
+    <div class="cursor__ring"><span class="cursor__label"></span></div>
+    <div class="cursor__dot"></div>
+  </div>
+
+  <!-- ░░ PRELOADER ░░ -->
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__inner">
+      <div class="loader__row">
+        <span class="loader__tag">Muhammad Abubakar</span>
+        <span class="loader__tag">Portfolio — ’26</span>
+      </div>
+      <div class="loader__word" aria-hidden="true">
+        <span data-word>SECURING</span>
+        <span data-word>HARDENING</span>
+        <span data-word>DEFENDING</span>
+        <span data-word>ENGINEERING</span>
+      </div>
+      <div class="loader__bar"><i id="loaderFill"></i></div>
+      <div class="loader__row">
+        <span class="loader__tag loader__tag--mono">SYS // INIT</span>
+        <span class="loader__count"><span id="loaderPct">0</span>%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ NAV ░░ -->
+  <header class="nav" id="nav">
+    <a href="#hero" class="nav__logo" data-cursor="link" aria-label="Home — Abubakar">
+      <span class="nav__mark">▲</span> ABUBAKAR<sup>©</sup>
+    </a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#work" data-cursor="link" data-scramble>Work</a>
+      <a href="#about" data-cursor="link" data-scramble>About</a>
+      <a href="#skills" data-cursor="link" data-scramble>Skills</a>
+      <a href="#contact" data-cursor="link" data-scramble>Contact</a>
+    </nav>
+    <div class="nav__meta">
+      <span class="nav__status"><i></i> Available · 2027</span>
+      <span class="nav__clock" id="clock">--:--:-- PKT</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- ░░ HERO ░░ -->
+    <section class="hero" id="hero">
+      <canvas class="hero__canvas" id="flow" aria-hidden="true"></canvas>
+      <div class="hero__grid" aria-hidden="true"></div>
+
+      <div class="hero__top">
+        <span class="mono">Cyber Security Engineer</span>
+        <span class="mono">GIKI · Lahore, PK</span>
+      </div>
+
+      <div class="hero__center">
+        <p class="hero__overline mono" data-hero="over">
+          <i></i> Application Security — DevSecOps — ML Security
+        </p>
+        <h1 class="hero__title">
+          <span class="line"><span class="line__in" data-hero="line">MUHAMMAD</span></span>
+          <span class="line"><span class="line__in line__in--stroke" data-hero="line">ABUBAKAR</span></span>
+        </h1>
+        <p class="hero__tagline" data-hero="tag">
+          I engineer security into every layer — from the <em>physical wire</em>
+          to the <em>web</em>: modeling adversaries, gating pipelines, and turning
+          raw threat into hardened systems.
+        </p>
+      </div>
+
+      <div class="hero__bottom">
+        <a href="#work" class="hero__cue" data-cursor="link" data-hero="cue" aria-label="Scroll to work">
+          <span class="hero__cue-line"></span>
+          <span class="mono">Scroll to explore</span>
+        </a>
+        <div class="hero__coords mono" data-hero="cue">
+          <span>31.5204° N</span><span>74.3587° E</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ░░ MARQUEE ░░ -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track" id="marquee">
+        <span>AppSec</span><b>✦</b><span>DevSecOps</span><b>✦</b><span>Threat Modeling</span><b>✦</b>
+        <span>OWASP Top 10</span><b>✦</b><span>Zero Trust</span><b>✦</b><span>SAST / SCA</span><b>✦</b>
+        <span>Penetration Testing</span><b>✦</b><span>Incident Response</span><b>✦</b><span>Machine Learning</span><b>✦</b>
+      </div>
+    </div>
+
+    <!-- ░░ ABOUT / MANIFESTO ░░ -->
+    <section class="about" id="about">
+      <div class="section-head">
+        <span class="mono section-head__tag">(01) — About</span>
+        <span class="mono section-head__idx">A propos</span>
+      </div>
+
+      <div class="manifesto" id="manifesto">
+        <p class="manifesto__text">
+          <span class="w">Security</span> <span class="w">is</span> <span class="w">not</span>
+          <span class="w">a</span> <span class="w">feature</span> <span class="w">you</span>
+          <span class="w">bolt</span> <span class="w">on.</span> <span class="w">It</span>
+          <span class="w">is</span> <span class="w">an</span> <span class="w accent">architecture</span> —
+          <span class="w">modeled,</span> <span class="w">tested,</span> <span class="w">and</span>
+          <span class="w accent">engineered</span> <span class="w">into</span> <span class="w">every</span>
+          <span class="w">layer,</span> <span class="w">one</span> <span class="w accent">commit</span>
+          <span class="w">at</span> <span class="w">a</span> <span class="w">time.</span>
+        </p>
+      </div>
+
+      <div class="about__grid">
+        <div class="about__bio">
+          <p data-fade>
+            I'm <strong>Muhammad Abubakar</strong> — a final-year
+            <strong>BS Cyber Security</strong> student at the Ghulam Ishaq Khan
+            Institute (GIKI), specializing in application security, DevSecOps
+            automation, and machine-learning-driven defense.
+          </p>
+          <p data-fade>
+            My work spans an air-gapped Security Operations Center, browser
+            fingerprint-privacy tooling, reinforcement-learning research on
+            the physical-layer wiretap channel, and hardened full-stack systems
+            — each built end-to-end with threat modeling, SAST/SCA gating, and
+            OWASP-grade hardening.
+          </p>
+          <p data-fade>
+            Two security-focused internships at <strong>Thingtrax</strong>,
+            <span class="accent-text">2× Dean's Honor List</span>, and a
+            standing belief that the best defense is engineered, explainable,
+            and shipped.
+          </p>
+        </div>
+
+        <aside class="idcard" data-fade aria-label="Profile summary">
+          <div class="idcard__head mono">
+            <span>// IDENTITY</span><span>GIKI · BS-CYS</span>
+          </div>
+          <ul class="idcard__stats">
+            <li><b class="count" data-count="3.3" data-dec="1">0.0</b><span>CGPA / 4.00</span></li>
+            <li><b class="count" data-count="2" data-suffix="×">0</b><span>Dean's Honor List</span></li>
+            <li><b class="count" data-count="6" data-suffix="+">0</b><span>Security Builds</span></li>
+            <li><b class="count" data-count="2" data-suffix="">0</b><span>Internships</span></li>
+          </ul>
+          <div class="idcard__rows mono">
+            <div><span>BASED IN</span><span>Lahore, Pakistan</span></div>
+            <div><span>FOCUS</span><span>AppSec · DevSecOps</span></div>
+            <div><span>DEGREE</span><span>2023 — 2027</span></div>
+            <div><span>STATUS</span><span class="accent-text">Open to 2027 roles</span></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ░░ SELECTED WORK (horizontal pin) ░░ -->
+    <section class="work" id="work">
+      <div class="work__intro">
+        <div class="section-head">
+          <span class="mono section-head__tag">(02) — Selected Work</span>
+          <span class="mono section-head__idx" id="workCounter">01 / 06</span>
+        </div>
+        <h2 class="work__heading" data-split>Things I've<br /><em>secured</em> &amp; built.</h2>
+      </div>
+
+      <div class="work__pin" id="workPin">
+        <div class="work__track" id="workTrack">
+
+          <!-- 01 VYREX -->
+          <article class="panel" data-cursor="drag" data-cursor-label="DRAG">
+            <div class="panel__body">
+              <div class="panel__meta mono">
+                <span>01</span><i></i><span>2026 · Final-Year Project</span>
+              </div>
+              <h3 class="panel__title">VYREX</h3>
+              <p class="panel__sub mono">Air-Gapped SOC &amp; Vulnerability Intelligence</p>
+              <p class="panel__desc">
+                An on-premises Security Operations Center with explainable,
+                exploit-aware risk scoring and a governed agentic AI analyst —
+                nothing ever leaves the building. Four-layer pipeline: Go agent →
+                mTLS ingest → JetStream → workers → Postgres / TimescaleDB /
+                OpenSearch, with a composite risk score re-ranked by XGBoost and
+                explained with SHAP across multi-tool consensus.
+              </p>
+              <ul class="panel__tags mono">
+                <li>FastAPI</li><li>Go</li><li>XGBoost</li><li>SHAP</li><li>OpenSearch</li><li>Docker</li>
+              </ul>
+              <a class="panel__link" href="https://github.com/kryptbakar/FYP" target="_blank" rel="noopener" data-cursor="link" data-magnetic>
+                <span>Explore repository</span><span class="panel__arrow">→</span>
+              </a>
+            </div>
+            <div class="panel__visual">
+              <img src="assets/img/work/01-vyrex.svg" alt="Network topology with a shielded core representing the VYREX SOC architecture" loading="lazy" />
+            </div>
+          </article>
+
+          <!-- 02 DQN -->
+          <article class="panel" data-cursor="drag" data-cursor-label="DRAG">
+            <div class="panel__body">
+              <div class="panel__meta mono">
+                <span>02</span><i></i><span>2026 · Research</span>
+              </div>
+              <h3 class="panel__title">DQN Noise<br />Allocation</h3>
+              <p class="panel__sub mono">Physical-Layer Wireless Security · RL</p>
+              <p class="panel__desc">
+                A Deep Q-Network that adaptively splits transmit power between
+                signal and artificial jamming noise on a MISO wiretap channel
+                under imperfect CSI. Trained against MRT beamforming and Rayleigh
+                fading, it gains <strong>+0.299 bits/s/Hz</strong> of secrecy
+                rate over fixed allocation at low SNR — learning to protect the
+                link where classical optimizers fail.
+              </p>
+              <ul class="panel__tags mono">
+                <li>TensorFlow</li><li>DQN</li><li>MISO</li><li>Secrecy Rate</li><li>NumPy</li>
+              </ul>
+              <a class="panel__link" href="https://github.com/kryptbakar/DQN-Enhanced-Adaptive-Artificial-Noise-Power-Allocation" target="_blank" rel="noopener" data-cursor="link" data-magnetic>
+                <span>Explore repository</span><span class="panel__arrow">→</span>
+              </a>
+            </div>
+            <div class="panel__visual">
+              <img src="assets/img/work/02-dqn.svg" alt="Transmitter radiating secrecy waves with a directed beam and artificial-noise field" loading="lazy" />
+            </div>
+          </article>
+
+          <!-- 03 PHANTOM -->
+          <article class="panel" data-cursor="drag" data-cursor-label="DRAG">
+            <div class="panel__body">
+              <div class="panel__meta mono">
+                <span>03</span><i></i><span>2025 · Privacy Tooling</span>
+              </div>
+              <h3 class="panel__title">Phantom<br />Identity</h3>
+              <p class="panel__sub mono">Browser Fingerprint Privacy · MV3</p>
+              <p class="panel__desc">
+                A Manifest V3 extension that defeats passive fingerprint tracking
+                by spoofing Canvas, WebGL, Navigator, Screen, and timezone
+                attributes on a per-session basis. An in-extension dashboard
+                surfaces fingerprint entropy and spoof effectiveness —
+                randomization runs entirely locally with zero outbound telemetry.
+              </p>
+              <ul class="panel__tags mono">
+                <li>JavaScript</li><li>Manifest V3</li><li>Canvas</li><li>WebGL</li><li>Privacy</li>
+              </ul>
+              <a class="panel__link" href="https://github.com/kryptbakar/Phantom-Identity" target="_blank" rel="noopener" data-cursor="link" data-magnetic>
+                <span>Explore repository</span><span class="panel__arrow">→</span>
+              </a>
+            </div>
+            <div class="panel__visual">
+              <img src="assets/img/work/03-phantom.svg" alt="A fingerprint dissolving into random entropy on a scan line" loading="lazy" />
+            </div>
+          </article>
+
+          <!-- 04 DEVSECOPS -->
+          <article class="panel" data-cursor="drag" data-cursor-label="DRAG">
+            <div class="panel__body">
+              <div class="panel__meta mono">
+                <span>04</span><i></i><span>2025 · AppSec Automation</span>
+              </div>
+              <h3 class="panel__title">DevSecOps<br />Pipeline</h3>
+              <p class="panel__sub mono">Shift-Left CI/CD Security Gates</p>
+              <p class="panel__desc">
+                Fail-fast security gates wired into GitHub Actions — pytest,
+                Bandit (SAST), and pip-audit (SCA) — that block any push carrying
+                secrets, SQL-injection patterns, or vulnerable dependencies.
+                Packaged as a reusable workflow template so downstream repos
+                inherit the same hardened security posture with zero per-project
+                configuration.
+              </p>
+              <ul class="panel__tags mono">
+                <li>GitHub Actions</li><li>Bandit</li><li>pip-audit</li><li>Python</li><li>OWASP</li>
+              </ul>
+              <a class="panel__link" href="https://github.com/kryptbakar/Secure-DevSecOps-CI-CD-Pipeline-Implementation" target="_blank" rel="noopener" data-cursor="link" data-magnetic>
+                <span>Explore repository</span><span class="panel__arrow">→</span>
+              </a>
+            </div>
+            <div class="panel__visual">
+              <img src="assets/img/work/04-devsecops.svg" alt="A CI/CD pipeline with security gates inside a shield outline" loading="lazy" />
+            </div>
+          </article>
+
+          <!-- 05 BAKRI PAY -->
+          <article class="panel" data-cursor="drag" data-cursor-label="DRAG">
+            <div class="panel__body">
+              <div class="panel__meta mono">
+                <span>05</span><i></i><span>2024 · Secure Banking</span>
+              </div>
+              <h3 class="panel__title">Bakri Pay</h3>
+              <p class="panel__sub mono">Hardened Banking Platform · AppSec</p>
+              <p class="panel__desc">
+                A full-stack banking platform with secure session auth,
+                transaction handling, and rules-based fraud detection on
+                suspicious transfers. Controls mapped to the OWASP Top 10 —
+                bcrypt/Argon2 hashing, CSRF tokens, parameterized queries, and
+                authenticated REST endpoints — validated end-to-end through a
+                Burp Suite vulnerability assessment.
+              </p>
+              <ul class="panel__tags mono">
+                <li>Flask</li><li>OWASP Top 10</li><li>Burp Suite</li><li>PostgreSQL</li><li>Fraud Detection</li>
+              </ul>
+              <a class="panel__link" href="https://github.com/kryptbakar/Bakri-Pay-Secure-Banking-Application-" target="_blank" rel="noopener" data-cursor="link" data-magnetic>
+                <span>Explore repository</span><span class="panel__arrow">→</span>
+              </a>
+            </div>
+            <div class="panel__visual">
+              <img src="assets/img/work/05-bakri.svg" alt="A vault dial and payment card representing a secure banking platform" loading="lazy" />
+            </div>
+          </article>
+
+          <!-- 06 IDS -->
+          <article class="panel" data-cursor="drag" data-cursor-label="DRAG">
+            <div class="panel__body">
+              <div class="panel__meta mono">
+                <span>06</span><i></i><span>2024 · ML Security</span>
+              </div>
+              <h3 class="panel__title">AI Intrusion<br />Detection</h3>
+              <p class="panel__sub mono">Hybrid Anomaly Detection</p>
+              <p class="panel__desc">
+                A hybrid detector pairing a supervised CatBoost classifier with
+                an unsupervised Local Outlier Factor novelty model — flagging a
+                sample as malicious when either fires, prioritizing recall while
+                staying explainable. Trained on <strong>1.6M samples in ~7.5
+                minutes</strong> to catch attack patterns pure supervised models
+                miss.
+              </p>
+              <ul class="panel__tags mono">
+                <li>CatBoost</li><li>LOF</li><li>scikit-learn</li><li>Streamlit</li><li>1.6M samples</li>
+              </ul>
+              <a class="panel__link" href="https://github.com/kryptbakar/AI-Integrated-Intrusion-Detection-System" target="_blank" rel="noopener" data-cursor="link" data-magnetic>
+                <span>Explore repository</span><span class="panel__arrow">→</span>
+              </a>
+            </div>
+            <div class="panel__visual">
+              <img src="assets/img/work/06-ids.svg" alt="A radar sweep highlighting a single caught anomaly among benign blips" loading="lazy" />
+            </div>
+          </article>
+
+        </div>
+        <div class="work__progress" aria-hidden="true"><i id="workProgress"></i></div>
+      </div>
+
+      <div class="work__more">
+        <span class="mono">More on GitHub —</span>
+        <a href="https://github.com/kryptbakar" target="_blank" rel="noopener" data-cursor="link" data-magnetic>
+          15+ repositories <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ░░ CAPABILITIES / SKILLS ░░ -->
+    <section class="skills" id="skills">
+      <div class="section-head">
+        <span class="mono section-head__tag">(03) — Capabilities</span>
+        <span class="mono section-head__idx">Toolkit</span>
+      </div>
+      <div class="skills__grid">
+        <div class="skills__cell" data-fade>
+          <span class="skills__label mono">Security</span>
+          <ul>
+            <li>Application Security</li><li>Penetration Testing</li><li>Vulnerability Assessment</li>
+            <li>Threat Modeling</li><li>Incident Response</li><li>OWASP Top 10</li>
+            <li>SAST / SCA</li><li>Zero Trust</li><li>IDS / IPS</li>
+          </ul>
+        </div>
+        <div class="skills__cell" data-fade>
+          <span class="skills__label mono">Tooling</span>
+          <ul>
+            <li>Burp Suite</li><li>Nmap</li><li>Metasploit</li><li>Wireshark</li>
+            <li>Bandit · pip-audit</li><li>GitHub Actions</li><li>Prometheus · Grafana</li><li>Kali Linux</li>
+          </ul>
+        </div>
+        <div class="skills__cell" data-fade>
+          <span class="skills__label mono">Engineering</span>
+          <ul>
+            <li>Python</li><li>C++</li><li>JavaScript</li><li>SQL · Bash</li>
+            <li>Flask</li><li>React · Next.js</li><li>REST APIs</li>
+          </ul>
+        </div>
+        <div class="skills__cell" data-fade>
+          <span class="skills__label mono">GRC &amp; Frameworks</span>
+          <ul>
+            <li>NIST CSF</li><li>ISO 27001</li><li>Secure SDLC</li>
+            <li>SIEM / SOC workflows</li><li>Log Analysis</li><li>GRC</li>
+          </ul>
+        </div>
+        <div class="skills__cell" data-fade>
+          <span class="skills__label mono">ML / Data</span>
+          <ul>
+            <li>TensorFlow</li><li>scikit-learn</li><li>CatBoost</li>
+            <li>Pandas</li><li>MySQL · PostgreSQL</li>
+          </ul>
+        </div>
+        <div class="skills__cell" data-fade>
+          <span class="skills__label mono">Systems</span>
+          <ul>
+            <li>Linux — Kali / Ubuntu / RHEL</li><li>Windows Server</li><li>Docker</li><li>Cisco Packet Tracer</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ░░ EXPERIENCE ░░ -->
+    <section class="exp" id="experience">
+      <div class="section-head">
+        <span class="mono section-head__tag">(04) — Experience</span>
+        <span class="mono section-head__idx">Track record</span>
+      </div>
+      <ol class="exp__list">
+        <li class="exp__item" data-fade>
+          <div class="exp__period mono">Jun — Aug 2025</div>
+          <div class="exp__main">
+            <h3>Software QA Intern <em>— Security Testing</em></h3>
+            <span class="exp__org mono">Thingtrax · Lahore</span>
+            <p>Designed and executed security-focused test cases across 4 production
+              releases — auth-flow validation, input fuzzing, and dependency-vulnerability
+              checks alongside functional and regression coverage. Contributed to a
+              digitization workflow that cut document retrieval from ~15 min to under 5 sec.</p>
+          </div>
+        </li>
+        <li class="exp__item" data-fade>
+          <div class="exp__period mono">Jun — Aug 2024</div>
+          <div class="exp__main">
+            <h3>Secure Software Developer <em>Intern</em></h3>
+            <span class="exp__org mono">Thingtrax · Lahore</span>
+            <p>Built core auth, catalog, and checkout flows for an industry-sponsored
+              e-commerce platform with input validation and parameterized queries.
+              Coordinated weekly agile syncs for a 10-member team and shipped 50+
+              high-fidelity UI screens informed by research on 200+ users — improving
+              delivery cadence ~15%.</p>
+          </div>
+        </li>
+        <li class="exp__item" data-fade>
+          <div class="exp__period mono">2025 — 2026</div>
+          <div class="exp__main">
+            <h3>Applied Security <em>Research</em></h3>
+            <span class="exp__org mono">GIKI · Physical-Layer Security</span>
+            <p>Independent research on reinforcement-learning-driven artificial-noise
+              power allocation for the MISO wiretap channel under imperfect CSI —
+              modeling adversarial eavesdroppers and quantifying secrecy-rate gains
+              over classical optimization baselines.</p>
+          </div>
+        </li>
+      </ol>
+
+      <!-- certifications marquee -->
+      <div class="certs" aria-label="Certifications">
+        <div class="certs__track" id="certs">
+          <span>Google Cybersecurity Professional</span><b>/</b>
+          <span>AI for Cyber Security — Macquarie University</span><b>/</b>
+          <span>Linux Essentials — LPI</span><b>/</b>
+          <span>Cisco Networking Basics</span><b>/</b>
+          <span>Cisco Intro to Cybersecurity</span><b>/</b>
+        </div>
+      </div>
+    </section>
+
+    <!-- ░░ CONTACT ░░ -->
+    <section class="contact" id="contact">
+      <div class="section-head">
+        <span class="mono section-head__tag">(05) — Contact</span>
+        <span class="mono section-head__idx">Let's talk</span>
+      </div>
+
+      <h2 class="contact__head" data-split>
+        Let's build something<br /><em>secure</em> together.
+      </h2>
+
+      <div class="contact__cta">
+        <a class="contact__email" id="emailLink" href="mailto:abubakaramirwork@gmail.com" data-cursor="link" data-magnetic>
+          abubakaramirwork@gmail.com
+        </a>
+        <button class="contact__copy mono" id="copyEmail" type="button" data-cursor="link" aria-label="Copy email address">
+          <span>Copy</span>
+        </button>
+      </div>
+
+      <div class="contact__socials">
+        <a href="https://github.com/kryptbakar" target="_blank" rel="noopener" data-cursor="link" data-scramble>GitHub ↗</a>
+        <a href="https://www.linkedin.com/in/abubakar-amir" target="_blank" rel="noopener" data-cursor="link" data-scramble>LinkedIn ↗</a>
+        <a href="tel:+923394959692" data-cursor="link" data-scramble>+92 339 4959692</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ░░ FOOTER ░░ -->
+  <footer class="footer">
+    <div class="footer__brand">
+      <span class="footer__name">Muhammad Abubakar</span>
+      <span class="mono">BS Cyber Security · GIKI · Lahore, Pakistan</span>
+    </div>
+    <button class="footer__top" id="toTop" type="button" data-cursor="link" data-magnetic aria-label="Back to top">
+      ↑ Top
+    </button>
+    <div class="footer__credit mono">
+      <span>Designed &amp; engineered — 2026</span>
+      <span>© Muhammad Abubakar</span>
+    </div>
+  </footer>
+
+  <!-- GSAP + ScrollTrigger + Lenis (CDN, pinned versions) -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
