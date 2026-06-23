@@ -500,6 +500,33 @@ html.work-horizontal .panel__ghost { right: clamp(1rem, 3vw, 3rem); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 a:focus-visible, button:focus-visible, .nav__cv:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 3px; }
 
+/* ── 3D project stage (WebGL · progressive enhancement) ────────────────── */
+.stage3d { position: fixed; inset: 0; z-index: 4; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.6s var(--ease); }
+.stage3d.is-active { opacity: 1; visibility: visible; }
+.stage3d__canvas { position: absolute; inset: 0; display: block; }
+.stage3d.is-active .stage3d__canvas { pointer-events: auto; cursor: grab; }
+.stage3d__ui { position: absolute; inset: 0; pointer-events: none; }
+.stage3d__caption { position: absolute; left: var(--pad); bottom: clamp(2.5rem, 7vh, 5rem); max-width: 42ch; }
+.stage3d__caption .s-num { color: var(--accent); font-size: 0.7rem; margin-bottom: 0.8rem; }
+.stage3d__caption .s-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 4.5vw, 4rem);
+  line-height: 0.95; letter-spacing: -0.03em; margin-bottom: 1rem; }
+.stage3d__caption .s-tags { color: var(--muted); font-size: 0.66rem; letter-spacing: 0.12em; }
+.stage3d__quat { position: absolute; right: var(--pad); top: clamp(5.5rem, 13vh, 8rem); text-align: right; color: var(--muted); font-size: 0.62rem; }
+.stage3d__quat .s-quat-head { color: var(--faint); letter-spacing: 0.18em; margin-bottom: 0.7rem; }
+.stage3d__quat .s-quat-vals { display: flex; gap: 0.7rem; justify-content: flex-end; }
+.stage3d__quat .s-quat-vals span { color: var(--fg); min-width: 3.6ch; text-align: right; }
+.stage3d__quat .s-quat-reset { margin-top: 0.7rem; color: var(--accent); letter-spacing: 0.14em; }
+.stage3d__hint { position: absolute; left: 50%; bottom: 1.8rem; transform: translateX(-50%); color: var(--muted);
+  font-size: 0.6rem; letter-spacing: 0.2em; display: flex; align-items: center; gap: 0.6rem; }
+.stage3d__hint .s-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+html.webgl-work .work__track { opacity: 0 !important; pointer-events: none; }
+html.webgl-work .work__progress { display: none; }
+
+/* hide the native cursor once the custom cursor is live (desktop only) */
+@media (hover: hover) and (pointer: fine) {
+  html.has-cursor, html.has-cursor * { cursor: none !important; }
+}
+
 /* ── responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .about__grid { grid-template-columns: 1fr; }

@@ -54,6 +54,7 @@
   function initCursor() {
     const cur = $(".cursor");
     if (!cur || !fine || !hasGSAP) return;
+    document.documentElement.classList.add("has-cursor");
     const dot = $(".cursor__dot"), ring = $(".cursor__ring"), label = $(".cursor__label");
     gsap.set([dot, ring], { xPercent: -50, yPercent: -50 });
     const dx = gsap.quickTo(dot, "x", { duration: 0.08, ease: "power2" });
@@ -308,6 +309,7 @@
               const i = Math.min(total, Math.round(self.progress * (total - 1)) + 1);
               counter.textContent = String(i).padStart(2, "0") + " / " + String(total).padStart(2, "0");
             }
+            window.dispatchEvent(new CustomEvent("work:progress", { detail: { progress: self.progress } }));
           },
         },
       });
