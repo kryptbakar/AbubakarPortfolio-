@@ -308,13 +308,19 @@
       target = pr * (N - 1);
     });
 
-    // show only while the work section owns the viewport
+    // show whenever EITHER the pin is active OR the section is in view
+    // (two independent signals → robust even if one misfires for a pinned el)
+    let stIn = false, ioIn = false;
+    function refreshActive() {
+      const on = stIn || ioIn;
+      if (on) { stage.classList.add("is-active"); startLoop(); }
+      else { stage.classList.remove("is-active"); stopLoop(); }
+    }
+    window.addEventListener("work:active", (e) => { stIn = !!(e.detail && e.detail.active); refreshActive(); });
+    window.addEventListener("work:progress", () => { if (!stIn) { stIn = true; refreshActive(); } });
     if ("IntersectionObserver" in window) {
-      new IntersectionObserver(([en]) => {
-        if (en.isIntersecting) { stage.classList.add("is-active"); startLoop(); }
-        else { stage.classList.remove("is-active"); stopLoop(); }
-      }, { threshold: 0.02 }).observe(pin);
-    } else { stage.classList.add("is-active"); startLoop(); }
+      new IntersectionObserver(([en]) => { ioIn = en.isIntersecting; refreshActive(); }, { threshold: 0.01 }).observe(pin);
+    } else { stIn = true; refreshActive(); }
 
     // interaction
     const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();

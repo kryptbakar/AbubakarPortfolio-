@@ -331,6 +331,7 @@
             }
             window.dispatchEvent(new CustomEvent("work:progress", { detail: { progress: self.progress } }));
           },
+          onToggle: (self) => window.dispatchEvent(new CustomEvent("work:active", { detail: { active: self.isActive } })),
         },
       });
 
