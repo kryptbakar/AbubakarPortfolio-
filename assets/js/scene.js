@@ -235,9 +235,10 @@
         ]);
       composer = new EffectComposer(renderer);
       composer.addPass(new RenderPass(scene, camera));
-      const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.72, 0.55, 0.5);
+      // restrained post: subtle glow + a whisper of aberration (keeps text crisp)
+      const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.42, 0.35, 0.85);
       composer.addPass(bloom);
-      const rgb = new ShaderPass(RGBShiftShader); rgb.uniforms.amount.value = 0.0014; composer.addPass(rgb);
+      const rgb = new ShaderPass(RGBShiftShader); rgb.uniforms.amount.value = 0.0006; composer.addPass(rgb);
       composer.addPass(new OutputPass());
       composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
       composer.setSize(innerWidth, innerHeight);
