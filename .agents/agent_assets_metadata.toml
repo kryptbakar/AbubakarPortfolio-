@@ -1,0 +1,26 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "4Zq6_a_FjCp4P9nJHPCeF"
+uri = "file://artifacts/portfolio/public/projects/quantum.png"
+type = "image"
+title = "Quantum UI Design System"
+
+[[generated]]
+id = "53Ag8AEDLjeFX4T2sLX4K"
+uri = "file://artifacts/portfolio/public/projects/orbit.png"
+type = "image"
+title = "Orbit Dashboard Analytics"
+
+[[generated]]
+id = "lLx5qMonIPKew31ks_w-G"
+uri = "file://artifacts/portfolio/public/projects/cipher.png"
+type = "image"
+title = "Cipher Encrypted Notes"
+
+[[generated]]
+id = "hg9IjHVCH5unIATG8w_x8"
+uri = "file://artifacts/portfolio/public/projects/flux.png"
+type = "image"
+title = "Flux Motion Library"
