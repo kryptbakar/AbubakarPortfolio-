@@ -182,7 +182,7 @@ em { font-style: normal; }
 /* ── hero ──────────────────────────────────────────────────────────────── */
 .hero {
   position: relative; min-height: 100svh; width: 100%;
-  display: flex; flex-direction: column; justify-content: space-between;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
   padding: calc(var(--nav-h) + 2vh) var(--pad) clamp(1.5rem, 4vh, 3rem);
   overflow: hidden; isolation: isolate;
 }
@@ -196,26 +196,27 @@ em { font-style: normal; }
   -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%);
           mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%);
 }
-.hero__top, .hero__bottom { position: relative; z-index: 2; display: flex;
-  justify-content: space-between; align-items: flex-end; gap: 1rem; }
-.hero__top { align-items: flex-start; }
+.hero__top { position: absolute; top: calc(var(--nav-h) + 1.2vh); left: var(--pad); right: var(--pad); z-index: 2;
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
 .hero__top .mono { font-size: 0.66rem; }
-.hero__center { position: relative; z-index: 2; margin: auto 0; }
-.hero__overline { display: flex; align-items: center; gap: 0.8rem; font-size: 0.7rem;
-  color: var(--muted); margin-bottom: clamp(1.2rem, 3vh, 2.4rem); }
+.hero__overline { position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 0.8rem;
+  font-size: 0.7rem; color: var(--muted); margin-top: clamp(2.5vh, 7vh, 9vh); }
 .hero__overline i { display: inline-block; width: clamp(28px, 5vw, 56px); height: 1px; background: var(--accent); }
 .hero__title {
+  position: relative; z-index: 2; margin-top: auto; margin-bottom: clamp(7vh, 15vh, 19vh);
   font-family: var(--font-display); font-weight: 800;
-  font-size: clamp(3.4rem, 13.5vw, 14rem); line-height: 0.84; letter-spacing: -0.035em;
+  font-size: clamp(3.4rem, 14vw, 15rem); line-height: 0.84; letter-spacing: -0.04em;
+  text-shadow: 0 8px 60px rgba(0, 0, 0, 0.55);
 }
 .hero__title .line { display: block; overflow: hidden; }
 .hero__title .line__in { display: block; transform: translateY(105%); will-change: transform; }
 .line__in--stroke {
   color: transparent; -webkit-text-stroke: clamp(1px, 0.2vw, 2px) var(--fg);
 }
+.hero__foot { position: absolute; left: var(--pad); bottom: clamp(1.5rem, 4vh, 3rem); z-index: 2;
+  display: flex; flex-direction: column; gap: clamp(1rem, 2vh, 1.6rem); max-width: 34ch; text-align: left; }
 .hero__tagline {
-  font-size: clamp(1rem, 1.7vw, 1.4rem); line-height: 1.5; max-width: 40ch;
-  color: var(--muted); margin-top: clamp(1.5rem, 4vh, 2.8rem); font-weight: 400;
+  font-size: clamp(0.92rem, 1.3vw, 1.15rem); line-height: 1.55; color: var(--muted); font-weight: 400;
 }
 .hero__tagline em { font-family: var(--font-serif); font-style: italic; color: var(--fg); font-weight: 500; }
 .hero__cue { display: flex; align-items: center; gap: 0.8rem; color: var(--muted); }
@@ -224,7 +225,8 @@ em { font-style: normal; }
 .hero__cue-line::after { content: ""; position: absolute; inset: 0; background: var(--accent);
   transform: translateX(-100%); animation: cue 2.2s var(--ease) infinite; }
 @keyframes cue { 0% { transform: translateX(-100%); } 60%, 100% { transform: translateX(100%); } }
-.hero__coords { display: flex; flex-direction: column; align-items: flex-end; gap: 0.2rem; font-size: 0.62rem; }
+.hero__coords { position: absolute; right: var(--pad); bottom: clamp(1.5rem, 4vh, 3rem); z-index: 2;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 0.2rem; font-size: 0.62rem; }
 
 /* ── marquee ───────────────────────────────────────────────────────────── */
 .marquee { overflow: hidden; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
@@ -530,13 +532,15 @@ html.webgl-work .work__progress { display: none; }
 }
 
 /* ── hero portrait (cut-out, blends into the page) ─────────────────────── */
-.hero__portrait { position: absolute; right: 0; bottom: 0; height: min(86vh, 940px); z-index: 1; pointer-events: none;
-  -webkit-mask-image: linear-gradient(to bottom, #000 66%, transparent 97%);
-          mask-image: linear-gradient(to bottom, #000 66%, transparent 97%); }
-.hero__portrait img { height: 100%; width: auto; object-fit: contain; object-position: bottom right;
-  filter: grayscale(0.18) contrast(1.05) brightness(0.95); }
+.hero__portrait { position: absolute; left: 0; right: 0; margin: 0 auto; width: max-content; bottom: 0;
+  height: min(96vh, 1120px); z-index: 1; pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 99%);
+          mask-image: linear-gradient(to bottom, #000 72%, transparent 99%); }
+.hero__portrait img { height: 100%; width: auto; object-fit: contain; object-position: bottom center;
+  filter: grayscale(0.15) contrast(1.04) brightness(0.96); }
 .hero__portrait::after { content: ""; position: absolute; inset: 0;
-  background: linear-gradient(102deg, var(--bg) 4%, rgba(10, 10, 12, 0.45) 30%, transparent 56%); }
+  background: radial-gradient(ellipse 72% 42% at 50% 74%, rgba(10, 10, 12, 0.8), transparent 72%),
+              linear-gradient(to bottom, transparent 56%, var(--bg) 99%); }
 
 /* ── section rail ──────────────────────────────────────────────────────── */
 .rail { position: fixed; left: clamp(0.9rem, 2vw, 1.8rem); top: 50%; transform: translateY(-50%); z-index: 3; display: flex; flex-direction: column; gap: 1.1rem; }
@@ -582,14 +586,14 @@ html.webgl-work .work__progress { display: none; }
 @media (max-width: 1024px) {
   .rail { display: none; }
   .approach__list { grid-template-columns: repeat(2, 1fr); }
-  .hero__portrait { height: 64vh; right: -8%; opacity: 0.5; }
+  .hero__portrait { height: 74vh; }
   .about__grid { grid-template-columns: 1fr; }
   .idcard { max-width: 460px; }
 }
 @media (max-width: 768px) {
   .nav__links { display: none; }
   .nav__meta .nav__clock { display: none; }
-  .hero__portrait { height: 52vh; right: -14%; opacity: 0.3; }
+  .hero__portrait { height: 60vh; opacity: 0.92; }
   .hero__top { flex-direction: column; gap: 0.3rem; }
   .panel__title { font-size: clamp(2.2rem, 11vw, 3.4rem); }
   .exp__item { grid-template-columns: 1fr; gap: 0.8rem; }
