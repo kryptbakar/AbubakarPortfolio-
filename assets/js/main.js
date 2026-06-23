@@ -234,7 +234,7 @@
     if (!motion) return;
 
     // hero parallax
-    gsap.to(".hero__title", { yPercent: -16, opacity: 0.2, ease: "none",
+    gsap.to(".hero__lead", { yPercent: -16, opacity: 0.2, ease: "none",
       scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: true } });
     gsap.to(".hero__portrait", { yPercent: 8, opacity: 0.25, ease: "none",
       scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: true } });
