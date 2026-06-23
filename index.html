@@ -115,9 +115,19 @@
     <div class="nav__meta">
       <a class="nav__cv" href="assets/Muhammad-Abubakar-CV.pdf" download data-cursor="link">CV ↓</a>
       <span class="nav__status"><i></i> Available · 2027</span>
-      <span class="nav__clock" id="clock">--:--:-- PKT</span>
+      <span class="nav__clock" id="clock" data-clock>--:--:-- PKT</span>
     </div>
   </header>
+
+  <!-- ░░ SECTION RAIL ░░ -->
+  <aside class="rail" aria-label="Section navigation">
+    <a class="rail__item is-active" href="#hero" data-rail="hero" data-cursor="link"><span class="rail__dot"></span><span class="rail__label">Index</span></a>
+    <a class="rail__item" href="#about" data-rail="about" data-cursor="link"><span class="rail__dot"></span><span class="rail__label">About</span></a>
+    <a class="rail__item" href="#work" data-rail="work" data-cursor="link"><span class="rail__dot"></span><span class="rail__label">Work</span></a>
+    <a class="rail__item" href="#archive" data-rail="archive" data-cursor="link"><span class="rail__dot"></span><span class="rail__label">Archive</span></a>
+    <a class="rail__item" href="#skills" data-rail="skills" data-cursor="link"><span class="rail__dot"></span><span class="rail__label">Skills</span></a>
+    <a class="rail__item" href="#contact" data-rail="contact" data-cursor="link"><span class="rail__dot"></span><span class="rail__label">Contact</span></a>
+  </aside>
 
   <main>
     <!-- ░░ HERO ░░ -->
@@ -133,7 +143,7 @@
 
       <div class="hero__center">
         <p class="hero__overline mono" data-hero="over">
-          <i></i> Application Security — DevSecOps — ML Security
+          <i></i> Focus — <span class="hero__rotate" id="heroRotate">Application Security</span>
         </p>
         <h1 class="hero__title">
           <span class="line"><span class="line__in" data-hero="line">MUHAMMAD</span></span>
@@ -229,11 +239,42 @@
       </div>
     </section>
 
+    <!-- ░░ APPROACH / METHODOLOGY ░░ -->
+    <section class="approach" id="approach">
+      <div class="section-head">
+        <span class="mono section-head__tag">(02) — Approach</span>
+        <span class="mono section-head__idx">Methodology</span>
+      </div>
+      <h2 class="approach__lead" data-split>Security, <em>engineered</em><br />end to end.</h2>
+      <ol class="approach__list">
+        <li class="approach__step" data-fade>
+          <span class="approach__num mono">01</span>
+          <h3>Model</h3>
+          <p>Threat-model before a line ships — map the attack surface, the adversaries, and what "secure" has to mean for this system.</p>
+        </li>
+        <li class="approach__step" data-fade>
+          <span class="approach__num mono">02</span>
+          <h3>Build</h3>
+          <p>Engineer secure-by-default: input validation, authenticated flows, least privilege, and parameterized everything.</p>
+        </li>
+        <li class="approach__step" data-fade>
+          <span class="approach__num mono">03</span>
+          <h3>Gate</h3>
+          <p>Shift left. SAST, SCA, and secret-scanning gates that fail the build fast — security as a property of the pipeline.</p>
+        </li>
+        <li class="approach__step" data-fade>
+          <span class="approach__num mono">04</span>
+          <h3>Harden</h3>
+          <p>Pen-test, map controls to OWASP &amp; NIST, and prove it with evidence — not assertions.</p>
+        </li>
+      </ol>
+    </section>
+
     <!-- ░░ SELECTED WORK (horizontal pin) ░░ -->
     <section class="work" id="work">
       <div class="work__intro">
         <div class="section-head">
-          <span class="mono section-head__tag">(02) — Selected Work</span>
+          <span class="mono section-head__tag">(03) — Selected Work</span>
           <span class="mono section-head__idx" id="workCounter">01 / 06</span>
         </div>
         <h2 class="work__heading" data-split>Things I've<br /><em>secured</em> &amp; built.</h2>
@@ -418,7 +459,7 @@
     <!-- ░░ ARCHIVE ░░ -->
     <section class="archive" id="archive">
       <div class="section-head">
-        <span class="mono section-head__tag">(03) — Archive</span>
+        <span class="mono section-head__tag">(04) — Archive</span>
         <span class="mono section-head__idx">More work</span>
       </div>
       <ul class="archive__list">
@@ -514,7 +555,7 @@
     <!-- ░░ CAPABILITIES / SKILLS ░░ -->
     <section class="skills" id="skills">
       <div class="section-head">
-        <span class="mono section-head__tag">(04) — Capabilities</span>
+        <span class="mono section-head__tag">(05) — Capabilities</span>
         <span class="mono section-head__idx">Toolkit</span>
       </div>
       <div class="skills__grid">
@@ -566,7 +607,7 @@
     <!-- ░░ EXPERIENCE ░░ -->
     <section class="exp" id="experience">
       <div class="section-head">
-        <span class="mono section-head__tag">(05) — Experience</span>
+        <span class="mono section-head__tag">(06) — Experience</span>
         <span class="mono section-head__idx">Track record</span>
       </div>
       <ol class="exp__list">
@@ -623,7 +664,7 @@
       <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
       <div class="deco-ring" aria-hidden="true"></div>
       <div class="section-head">
-        <span class="mono section-head__tag">(06) — Contact</span>
+        <span class="mono section-head__tag">(07) — Contact</span>
         <span class="mono section-head__idx">Let's talk</span>
       </div>
 
@@ -651,15 +692,23 @@
 
   <!-- ░░ FOOTER ░░ -->
   <footer class="footer">
-    <div class="footer__brand">
-      <span class="footer__name">Muhammad Abubakar</span>
-      <span class="mono">BS Cyber Security · GIKI · Lahore, Pakistan</span>
+    <div class="footer__bar">
+      <div class="footer__brand">
+        <span class="footer__name">Muhammad Abubakar</span>
+        <span class="mono">BS Cyber Security · GIKI · Lahore, PK</span>
+      </div>
+      <nav class="footer__links" aria-label="Footer">
+        <a href="https://github.com/kryptbakar" target="_blank" rel="noopener" data-cursor="link" data-scramble>GitHub</a>
+        <a href="https://www.linkedin.com/in/muhammad-abubakar-28b4a2312/" target="_blank" rel="noopener" data-cursor="link" data-scramble>LinkedIn</a>
+        <a href="mailto:abubakaramirwork@gmail.com" data-cursor="link" data-scramble>Email</a>
+        <a href="assets/Muhammad-Abubakar-CV.pdf" download data-cursor="link" data-scramble>Résumé</a>
+      </nav>
+      <button class="footer__top" id="toTop" type="button" data-cursor="link" data-magnetic aria-label="Back to top">↑ Top</button>
     </div>
-    <button class="footer__top" id="toTop" type="button" data-cursor="link" data-magnetic aria-label="Back to top">
-      ↑ Top
-    </button>
-    <div class="footer__credit mono">
+    <div class="footer__wordmark" aria-hidden="true">ABUBAKAR</div>
+    <div class="footer__meta mono">
       <span>Designed &amp; engineered — 2026</span>
+      <span data-clock>--:--:-- PKT</span>
       <span>© Muhammad Abubakar</span>
     </div>
   </footer>

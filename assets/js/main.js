@@ -24,16 +24,29 @@
 
   /* ── live clock (Asia/Karachi · UTC+5) ──────────────────────────────── */
   function initClock() {
-    const el = $("#clock");
-    if (!el) return;
+    const els = $$("[data-clock]");
+    if (!els.length) return;
     const tick = () => {
       const now = new Date();
       const pkt = new Date(now.getTime() + (now.getTimezoneOffset() + 300) * 60000);
       const p = (n) => String(n).padStart(2, "0");
-      el.textContent = `${p(pkt.getHours())}:${p(pkt.getMinutes())}:${p(pkt.getSeconds())} PKT`;
+      const s = `${p(pkt.getHours())}:${p(pkt.getMinutes())}:${p(pkt.getSeconds())} PKT`;
+      els.forEach((el) => (el.textContent = s));
     };
     tick();
     setInterval(tick, 1000);
+  }
+
+  /* ── hero rotating discipline ───────────────────────────────────────── */
+  function initRoles() {
+    const el = $("#heroRotate");
+    if (!el || reduced) return;
+    const roles = ["Application Security", "DevSecOps Automation", "Penetration Testing", "ML-Driven Defense", "Threat Modeling"];
+    let i = 0;
+    setInterval(() => {
+      el.classList.add("is-out");
+      setTimeout(() => { i = (i + 1) % roles.length; el.textContent = roles[i]; el.classList.remove("is-out"); }, 420);
+    }, 2600);
   }
 
   /* ── smooth scroll ──────────────────────────────────────────────────── */
@@ -55,6 +68,11 @@
     const cur = $(".cursor");
     if (!cur || !fine || !hasGSAP) return;
     document.documentElement.classList.add("has-cursor");
+    // contextual labels
+    $$(".panel__link").forEach((e) => e.setAttribute("data-cursor-label", "OPEN"));
+    $$(".archive__row a").forEach((e) => e.setAttribute("data-cursor-label", "VIEW"));
+    $$(".contact__email").forEach((e) => e.setAttribute("data-cursor-label", "MAIL"));
+    $$('a[href$=".pdf"]').forEach((e) => e.setAttribute("data-cursor-label", "PDF"));
     const dot = $(".cursor__dot"), ring = $(".cursor__ring"), label = $(".cursor__label");
     gsap.set([dot, ring], { xPercent: -50, yPercent: -50 });
     const dx = gsap.quickTo(dot, "x", { duration: 0.08, ease: "power2" });
@@ -428,18 +446,16 @@
 
   /* ── scroll-spy: highlight the active nav link ──────────────────────── */
   function initScrollSpy() {
-    const links = {};
-    $$(".nav__links a").forEach((a) => {
-      const id = (a.getAttribute("href") || "").replace(/^#/, "");
-      if (id) links[id] = a;
-    });
-    const ids = Object.keys(links);
-    if (!ids.length || !("IntersectionObserver" in window)) return;
+    if (!("IntersectionObserver" in window)) return;
+    const nav = {}; $$(".nav__links a").forEach((a) => { const id = (a.getAttribute("href") || "").replace(/^#/, ""); if (id) nav[id] = a; });
+    const rail = {}; $$(".rail__item").forEach((a) => { if (a.dataset.rail) rail[a.dataset.rail] = a; });
+    const ids = ["hero", "about", "approach", "work", "archive", "skills", "experience", "contact"];
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
         if (!e.isIntersecting) return;
-        Object.values(links).forEach((l) => l.classList.remove("is-active"));
-        if (links[e.target.id]) links[e.target.id].classList.add("is-active");
+        const id = e.target.id;
+        if (nav[id]) { Object.values(nav).forEach((l) => l.classList.remove("is-active")); nav[id].classList.add("is-active"); }
+        if (rail[id]) { Object.values(rail).forEach((l) => l.classList.remove("is-active")); rail[id].classList.add("is-active"); }
       });
     }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
     ids.forEach((id) => { const el = document.getElementById(id); if (el) io.observe(el); });
@@ -482,6 +498,7 @@
 
   // independent of the loader
   initClock();
+  initRoles();
   initCursor();
   initMagnetic();
   initScramble();
