@@ -9,6 +9,8 @@ on:
     paths:
       - "index.html"
       - "assets/**"
+      - "robots.txt"
+      - "sitemap.xml"
       - ".nojekyll"
       - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
@@ -36,6 +38,7 @@ jobs:
         run: |
           mkdir -p _site
           cp -r index.html assets _site/
+          cp robots.txt sitemap.xml _site/ 2>/dev/null || true
           touch _site/.nojekyll
 
       - name: Configure Pages

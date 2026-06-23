@@ -424,6 +424,25 @@
     });
   }
 
+  /* ── scroll-spy: highlight the active nav link ──────────────────────── */
+  function initScrollSpy() {
+    const links = {};
+    $$(".nav__links a").forEach((a) => {
+      const id = (a.getAttribute("href") || "").replace(/^#/, "");
+      if (id) links[id] = a;
+    });
+    const ids = Object.keys(links);
+    if (!ids.length || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        Object.values(links).forEach((l) => l.classList.remove("is-active"));
+        if (links[e.target.id]) links[e.target.id].classList.add("is-active");
+      });
+    }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
+    ids.forEach((id) => { const el = document.getElementById(id); if (el) io.observe(el); });
+  }
+
   /* ── preloader ──────────────────────────────────────────────────────── */
   function runLoader(done) {
     const loader = $("#loader");
@@ -470,6 +489,7 @@
   initGhost();
   initSpotlight();
   initTilt();
+  initScrollSpy();
 
   runLoader(start);
 
