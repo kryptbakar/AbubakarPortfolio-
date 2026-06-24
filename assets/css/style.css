@@ -581,6 +581,16 @@ html.webgl-work .work__progress { display: none; }
 .footer__meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; font-size: 0.62rem;
   color: var(--faint); border-top: 1px solid var(--line); padding-top: 1.5rem; }
 
+/* ── skills knowledge graph ────────────────────────────────────────────── */
+.skills__stage { position: relative; }
+.skills__canvas { display: none; }
+.skills__hint { display: none; }
+html.skills-graph .skills__canvas { display: block; width: 100%; height: clamp(440px, 66vh, 760px); touch-action: none; cursor: default; }
+html.skills-graph .skills__grid { display: none; }
+html.skills-graph .skills__hint { display: flex; align-items: center; gap: 0.6rem; position: absolute; left: 0; bottom: 0.4rem;
+  color: var(--faint); font-size: 0.6rem; pointer-events: none; }
+html.skills-graph .skills__hint span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
 /* ── responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .rail { display: none; }

@@ -181,6 +181,133 @@
     }
   }
 
+  /* ── skills knowledge graph (interactive canvas) ────────────────────── */
+  function initSkillsGraph() {
+    const section = document.getElementById("skills");
+    if (!section || reduced || !fine) return;
+    const canvas = section.querySelector(".skills__canvas");
+    const cells = $$(".skills__cell", section);
+    if (!canvas || !cells.length) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    document.documentElement.classList.add("skills-graph");
+
+    const ACCENT = "#c9f24e", BONE = "rgba(242,239,230,";
+    const cats = cells.map((c) => ({
+      label: (c.querySelector(".skills__label")?.textContent || "").trim(),
+      items: $$("li", c).map((li) => li.textContent.trim()),
+    }));
+
+    const nodes = [];
+    const core = { kind: "core", label: "ABUBAKAR", x: 0, y: 0, vx: 0, vy: 0, hx: 0, hy: 0, r: 8, parent: -1, cat: -1, phase: 0 };
+    nodes.push(core);
+    const hubIdx = [];
+    cats.forEach((cat, ci) => {
+      hubIdx[ci] = nodes.push({ kind: "hub", label: cat.label, x: 0, y: 0, vx: 0, vy: 0, hx: 0, hy: 0, r: 5, parent: 0, cat: ci, phase: Math.random() * 6.28 }) - 1;
+      cat.items.forEach((it) =>
+        nodes.push({ kind: "skill", label: it, x: 0, y: 0, vx: 0, vy: 0, hx: 0, hy: 0, r: 3, parent: hubIdx[ci], cat: ci, phase: Math.random() * 6.28 }));
+    });
+
+    let w = 1, h = 1, dpr = 1, cx = 0, cy = 0, R = 1, started = false, raf = 0, t = 0;
+    const mouse = { x: -1e5, y: -1e5 };
+    let drag = null, hover = null;
+
+    function layout() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas.getBoundingClientRect();
+      w = canvas.width = Math.max(1, Math.round(rect.width * dpr));
+      h = canvas.height = Math.max(1, Math.round(rect.height * dpr));
+      cx = w / 2; cy = h / 2; R = Math.min(w, h);
+      core.hx = cx; core.hy = cy; core.r = R * 0.013;
+      const n = cats.length;
+      cats.forEach((cat, ci) => {
+        const a = (ci / n) * Math.PI * 2 - Math.PI / 2;
+        const hub = nodes[hubIdx[ci]];
+        hub.hx = cx + Math.cos(a) * R * 0.30; hub.hy = cy + Math.sin(a) * R * 0.30; hub.r = R * 0.0085;
+        const sk = nodes.filter((x) => x.kind === "skill" && x.cat === ci);
+        sk.forEach((s, si) => {
+          const aa = a + (si - (sk.length - 1) / 2) * 0.32, rr = R * 0.44;
+          s.hx = cx + Math.cos(aa) * rr; s.hy = cy + Math.sin(aa) * rr; s.r = R * 0.005;
+        });
+      });
+    }
+    function reset() { for (const n of nodes) { n.x = cx + (Math.random() - 0.5) * 30; n.y = cy + (Math.random() - 0.5) * 30; n.vx = n.vy = 0; } }
+
+    function step() {
+      t += 0.01;
+      for (const n of nodes) {
+        if (n === drag) continue;
+        const bob = n.kind === "core" ? 0 : 5 * dpr;
+        n.vx += (n.hx + Math.cos(t + n.phase) * bob - n.x) * 0.026;
+        n.vy += (n.hy + Math.sin(t * 0.9 + n.phase) * bob - n.y) * 0.026;
+      }
+      for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        let dx = b.x - a.x, dy = b.y - a.y; const d2 = dx * dx + dy * dy, m = a.r + b.r + 15 * dpr;
+        if (d2 < m * m && d2 > 0.01) {
+          const d = Math.sqrt(d2), f = (m - d) / d * 0.5; dx *= f; dy *= f;
+          if (a !== drag) { a.vx -= dx; a.vy -= dy; }
+          if (b !== drag) { b.vx += dx; b.vy += dy; }
+        }
+      }
+      for (const n of nodes) {
+        if (n === drag) { n.x = mouse.x; n.y = mouse.y; n.vx = n.vy = 0; continue; }
+        n.vx = Math.max(-25, Math.min(25, n.vx * 0.85)); n.vy = Math.max(-25, Math.min(25, n.vy * 0.85));
+        n.x += n.vx; n.y += n.vy;
+      }
+    }
+    function rel(n) {
+      if (!hover) return true;
+      if (n === hover || n === core || hover.kind === "core") return true;
+      if (hover.kind === "hub") return n.parent === hubIdx[hover.cat];
+      if (hover.kind === "skill") return n === nodes[hover.parent];
+      return false;
+    }
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+      for (const n of nodes) {
+        if (n.parent < 0) continue;
+        const p = nodes[n.parent], hot = hover && rel(n) && rel(p);
+        ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(p.x, p.y);
+        ctx.strokeStyle = hot ? "rgba(201,242,78,0.45)" : BONE + "0.07)";
+        ctx.lineWidth = (hot ? 1.3 : 0.6) * dpr; ctx.stroke();
+      }
+      for (const n of nodes) {
+        const on = !hover || rel(n), big = n === hover;
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.r * (big ? 1.7 : 1), 0, 6.283);
+        if (n.kind === "core") ctx.fillStyle = ACCENT;
+        else if (n.kind === "hub") ctx.fillStyle = on ? ACCENT : "rgba(201,242,78,0.45)";
+        else ctx.fillStyle = big ? ACCENT : BONE + (on ? "0.8)" : "0.16)");
+        ctx.fill();
+        if (n.kind !== "skill" || (hover && rel(n))) {
+          ctx.font = `${(n.kind === "core" ? 11 : n.kind === "hub" ? 10 : 9) * dpr}px 'JetBrains Mono', monospace`;
+          ctx.fillStyle = n.kind === "skill" ? BONE + "0.9)" : ACCENT;
+          ctx.textAlign = "left"; ctx.textBaseline = "middle";
+          ctx.fillText(n.label, n.x + n.r * (big ? 1.7 : 1) + 6 * dpr, n.y);
+        }
+      }
+    }
+    function frame() { if (!started) return; step(); draw(); raf = requestAnimationFrame(frame); }
+    function pick(mx, my) { let best = null, bd = 20 * dpr; for (const n of nodes) { const d = Math.hypot(n.x - mx, n.y - my) - n.r; if (d < bd) { bd = d; best = n; } } return best; }
+    const pos = (e) => { const r = canvas.getBoundingClientRect(); mouse.x = (e.clientX - r.left) * dpr; mouse.y = (e.clientY - r.top) * dpr; };
+
+    canvas.addEventListener("pointermove", (e) => { pos(e); if (!drag) { hover = pick(mouse.x, mouse.y); canvas.style.cursor = hover ? "grab" : "default"; } });
+    canvas.addEventListener("pointerdown", (e) => { pos(e); drag = pick(mouse.x, mouse.y); if (drag) { canvas.style.cursor = "grabbing"; try { canvas.setPointerCapture(e.pointerId); } catch (_) {} } });
+    const up = () => { drag = null; canvas.style.cursor = hover ? "grab" : "default"; };
+    canvas.addEventListener("pointerup", up);
+    canvas.addEventListener("pointercancel", up);
+    canvas.addEventListener("pointerleave", () => { if (!drag) hover = null; });
+
+    layout();
+    window.addEventListener("resize", debounce(layout, 200));
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(([en]) => {
+        if (en.isIntersecting && !started) { started = true; reset(); raf = requestAnimationFrame(frame); }
+        else if (!en.isIntersecting && started) { started = false; cancelAnimationFrame(raf); }
+      }, { threshold: 0.12 }).observe(canvas);
+    } else { started = true; reset(); raf = requestAnimationFrame(frame); }
+  }
+
   /* ── velocity-reactive marquees ─────────────────────────────────────── */
   function initMarquees() {
     if (!motion) return;
@@ -512,6 +639,7 @@
   initSpotlight();
   initTilt();
   initScrollSpy();
+  initSkillsGraph();
 
   runLoader(start);
 
