@@ -80,23 +80,24 @@
     <div class="cursor__dot"></div>
   </div>
 
-  <!-- ░░ PRELOADER ░░ -->
+  <!-- ░░ PRELOADER (secure boot) ░░ -->
   <div class="loader" id="loader" aria-hidden="true">
     <div class="loader__inner">
       <div class="loader__row">
         <span class="loader__tag">Muhammad Abubakar</span>
         <span class="loader__tag">Portfolio — ’26</span>
       </div>
-      <div class="loader__word" aria-hidden="true">
-        <span data-word>SECURING</span>
-        <span data-word>HARDENING</span>
-        <span data-word>DEFENDING</span>
-        <span data-word>ENGINEERING</span>
+      <div class="boot mono" id="bootLog">
+        <div class="boot__line" data-at="14"><span class="boot__name">cryptographic core</span><span class="boot__stat">····</span></div>
+        <div class="boot__line" data-at="36"><span class="boot__name">sensor mesh</span><span class="boot__stat">····</span></div>
+        <div class="boot__line" data-at="58"><span class="boot__name">vulnerability intel feed</span><span class="boot__stat">····</span></div>
+        <div class="boot__line" data-at="80"><span class="boot__name">agentic analyst</span><span class="boot__stat">····</span></div>
       </div>
+      <div class="boot__grant" id="bootGrant">ACCESS GRANTED</div>
       <div class="loader__bar"><i id="loaderFill"></i></div>
       <div class="loader__row">
-        <span class="loader__tag loader__tag--mono">SYS // INIT</span>
-        <span class="loader__count"><span id="loaderPct">0</span>%</span>
+        <span class="loader__tag loader__tag--mono">SECURE BOOT // <span id="loaderPct">0</span>%</span>
+        <span class="loader__count" id="loaderState">INITIALIZING</span>
       </div>
     </div>
   </div>
@@ -676,6 +677,11 @@ Date:   2025 — 2026 · GIKI · Physical-Layer Security</div>
       <div class="section-head">
         <span class="mono section-head__tag">(07) — Contact</span>
         <span class="mono section-head__idx">Let's talk</span>
+      </div>
+
+      <div class="contact__channel mono" id="contactChannel" aria-hidden="true">
+        <span class="contact__channel-dot"></span>
+        <span id="channelText">awaiting secure channel…</span>
       </div>
 
       <h2 class="contact__head" data-split>

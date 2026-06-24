@@ -22,7 +22,7 @@
 
   let lenis = null;
 
-  /* ── live clock (Asia/Karachi · UTC+5) ──────────────────────────────── */
+  /* ── live clock (Asia/Karachi · UTC+5) ─────────────────────── */
   function initClock() {
     const els = $$("[data-clock]");
     if (!els.length) return;
@@ -37,7 +37,7 @@
     setInterval(tick, 1000);
   }
 
-  /* ── hero rotating discipline ───────────────────────────────────────── */
+  /* ── hero rotating discipline ─────────────────────────────── */
   function initRoles() {
     const el = $("#heroRotate");
     if (!el || reduced) return;
@@ -49,7 +49,7 @@
     }, 2600);
   }
 
-  /* ── smooth scroll ──────────────────────────────────────────────────── */
+  /* ── smooth scroll ────────────────────────────────────── */
   function initSmooth() {
     if (!hasLenis || !hasGSAP || reduced) return;
     lenis = new Lenis({ lerp: 0.09, smoothWheel: true, wheelMultiplier: 1 });
@@ -63,7 +63,7 @@
     else target.scrollIntoView({ behavior: "smooth" });
   };
 
-  /* ── custom cursor ──────────────────────────────────────────────────── */
+  /* ── custom cursor ────────────────────────────────────── */
   function initCursor() {
     const cur = $(".cursor");
     if (!cur || !fine || !hasGSAP) return;
@@ -95,7 +95,7 @@
     window.addEventListener("mouseenter", () => gsap.to(cur, { opacity: 1, duration: 0.3 }));
   }
 
-  /* ── magnetic elements ──────────────────────────────────────────────── */
+  /* ── magnetic elements ─────────────────────────────────── */
   function initMagnetic() {
     if (!fine || !hasGSAP) return;
     $$("[data-magnetic]").forEach((el) => {
@@ -110,7 +110,7 @@
     });
   }
 
-  /* ── scramble-on-hover links ────────────────────────────────────────── */
+  /* ── scramble-on-hover links ────────────────────────────── */
   function initScramble() {
     if (!fine) return;
     const CH = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/#%&";
@@ -130,7 +130,7 @@
     });
   }
 
-  /* ── hero flow-field canvas ─────────────────────────────────────────── */
+  /* ── hero flow-field canvas ──────────────────────────────── */
   function initFlow() {
     const canvas = $("#flow");
     if (!canvas || reduced) return;
@@ -181,7 +181,7 @@
     }
   }
 
-  /* ── approach: animated security pipeline ───────────────────────────── */
+  /* ── approach: animated security pipeline ───────────────────── */
   function initApproachPipeline() {
     const section = document.getElementById("approach");
     if (!section || reduced) return;
@@ -268,7 +268,7 @@
     } else { started = true; layout(); startCycle(performance.now() / 1000); raf = requestAnimationFrame(frame); }
   }
 
-  /* ── skills knowledge graph (interactive canvas) ────────────────────── */
+  /* ── skills knowledge graph (interactive canvas) ────────────────── */
   function initSkillsGraph() {
     const section = document.getElementById("skills");
     if (!section || reduced || !fine) return;
@@ -395,7 +395,7 @@
     } else { started = true; reset(); raf = requestAnimationFrame(frame); }
   }
 
-  /* ── velocity-reactive marquees ─────────────────────────────────────── */
+  /* ── velocity-reactive marquees ───────────────────────────── */
   function initMarquees() {
     if (!motion) return;
     const make = (el, dur) => {
@@ -417,7 +417,7 @@
     });
   }
 
-  /* ── word-level split (preserves <em> markup) ───────────────────────── */
+  /* ── word-level split (preserves <em> markup) ─────────────────── */
   function splitWords(el) {
     const lines = el.innerHTML.split(/<br\s*\/?>/i);
     el.innerHTML = lines
@@ -443,7 +443,7 @@
     });
   }
 
-  /* ── all scroll-driven setup ────────────────────────────────────────── */
+  /* ── all scroll-driven setup ────────────────────────────── */
   function buildScroll() {
     if (!motion) return;
 
@@ -500,7 +500,7 @@
     initWork();
   }
 
-  /* ── horizontal pinned work + scroll-coupled depth ──────────────────── */
+  /* ── horizontal pinned work + scroll-coupled depth ───────────────── */
   function initWork() {
     const pin = $("#workPin"), track = $("#workTrack");
     if (!pin || !track) return;
@@ -575,7 +575,7 @@
     mm.addEventListener("change", () => { build(); ScrollTrigger.refresh(); });
   }
 
-  /* ── hero intro ─────────────────────────────────────────────────────── */
+  /* ── hero intro ──────────────────────────────────────── */
   function heroIntro() {
     if (!motion) {
       gsap && gsap.set && gsap.set(".hero__title .line__in", { yPercent: 0 });
@@ -590,7 +590,7 @@
       .from('[data-hero="cue"]', { opacity: 0, duration: 0.8, stagger: 0.1 }, 0.95);
   }
 
-  /* ── nav + utilities ────────────────────────────────────────────────── */
+  /* ── nav + utilities ──────────────────────────────────── */
   function initNav() {
     $$('a[href^="#"]').forEach((a) => {
       a.addEventListener("click", (e) => {
@@ -616,7 +616,7 @@
     });
   }
 
-  /* ── scroll progress bar ────────────────────────────────────────────── */
+  /* ── scroll progress bar ────────────────────────────────── */
   function initScrollProgress() {
     const bar = $("#scrollProgress");
     if (!bar || !motion) return;
@@ -626,7 +626,7 @@
     } });
   }
 
-  /* ── cursor spotlight on cards & buttons ────────────────────────────── */
+  /* ── cursor spotlight on cards & buttons ────────────────────── */
   function initSpotlight() {
     if (!fine) return;
     $$(".skills__cell, .idcard, .contact__copy, .footer__top, .archive__row a").forEach((el) => {
@@ -639,7 +639,7 @@
     });
   }
 
-  /* ── 3D tilt on the profile card ────────────────────────────────────── */
+  /* ── 3D tilt on the profile card ──────────────────────────── */
   function initTilt() {
     if (!fine || !hasGSAP) return;
     $$(".idcard").forEach((el) => {
@@ -655,7 +655,7 @@
     });
   }
 
-  /* ── giant ghost numerals behind each project ───────────────────────── */
+  /* ── giant ghost numerals behind each project ─────────────────── */
   function initGhost() {
     $$(".panel").forEach((p) => {
       const meta = p.querySelector(".panel__meta span");
@@ -668,7 +668,7 @@
     });
   }
 
-  /* ── scroll-spy: highlight the active nav link ──────────────────────── */
+  /* ── scroll-spy: highlight the active nav link ─────────────────── */
   function initScrollSpy() {
     if (!("IntersectionObserver" in window)) return;
     const nav = {}; $$(".nav__links a").forEach((a) => { const id = (a.getAttribute("href") || "").replace(/^#/, ""); if (id) nav[id] = a; });
@@ -685,7 +685,7 @@
     ids.forEach((id) => { const el = document.getElementById(id); if (el) io.observe(el); });
   }
 
-  /* ── about: profile terminal (types on scroll) ──────────────────────── */
+  /* ── about: profile terminal (types on scroll) ────────────────── */
   function initTerminal() {
     const term = document.querySelector("[data-term]");
     if (!term) return;
@@ -713,7 +713,98 @@
     } else { run(); }
   }
 
-  /* ── command palette (⌘K) ───────────────────────────────────────────── */
+  /* ── contact: secure-channel reveal (decrypts the email on view) ───── */
+  function initContactReveal() {
+    const section = document.getElementById("contact");
+    const email = document.getElementById("emailLink");
+    const channel = document.getElementById("contactChannel");
+    const cText = document.getElementById("channelText");
+    if (!section) return;
+    const target = email ? email.textContent.trim() : "";
+    const secure = () => { if (cText) cText.textContent = "encrypted channel established · ready to connect"; if (channel) channel.classList.add("is-secure"); };
+    if (reduced || !("IntersectionObserver" in window)) { secure(); return; }
+    const CH = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@._-";
+    let done = false;
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting || done) return; done = true; io.disconnect();
+      if (cText) cText.textContent = "establishing secure channel…";
+      if (!email || !target) { secure(); return; }
+      let frame = 0; const total = 26;
+      const id = setInterval(() => {
+        email.textContent = target.split("").map((c, i) => (c === "@" || c === "." || i < (frame / total) * target.length) ? c : CH[(Math.random() * CH.length) | 0]).join("");
+        if (frame++ >= total) { clearInterval(id); email.textContent = target; secure(); }
+      }, 38);
+    }, { threshold: 0.3 });
+    io.observe(section);
+  }
+
+  /* ── archive hover preview (animated dashboard popup) ───────────── */
+  function drawArchiveCard(canvas, d, seed) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2), W = 480, H = 300;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    const x = canvas.getContext("2d"); if (!x) return; x.scale(dpr, dpr);
+    const bg = x.createLinearGradient(0, 0, W, H); bg.addColorStop(0, "#0c0c11"); bg.addColorStop(1, "#070709");
+    x.fillStyle = bg; x.fillRect(0, 0, W, H);
+    x.strokeStyle = "rgba(242,239,230,0.05)"; x.lineWidth = 1;
+    for (let gx = 32; gx < W; gx += 32) { x.beginPath(); x.moveTo(gx, 0); x.lineTo(gx, H); x.stroke(); }
+    for (let gy = 32; gy < H; gy += 32) { x.beginPath(); x.moveTo(0, gy); x.lineTo(W, gy); x.stroke(); }
+    const gl = x.createRadialGradient(120, 120, 10, 120, 120, 220); gl.addColorStop(0, "rgba(201,242,78,0.14)"); gl.addColorStop(1, "transparent"); x.fillStyle = gl; x.fillRect(0, 0, W, H);
+    x.strokeStyle = "#c9f24e"; x.lineWidth = 2; const m = 16, tk = 14;
+    [[m, m, 1, 1], [W - m, m, -1, 1], [m, H - m, 1, -1], [W - m, H - m, -1, -1]].forEach(([px, py, dx, dy]) => { x.beginPath(); x.moveTo(px, py); x.lineTo(px + dx * tk, py); x.moveTo(px, py); x.lineTo(px, py + dy * tk); x.stroke(); });
+    x.textBaseline = "middle"; x.textAlign = "left";
+    x.fillStyle = "#c9f24e"; x.beginPath(); x.arc(30, 32, 4, 0, 6.283); x.fill();
+    x.fillStyle = "rgba(242,239,230,0.5)"; x.font = "500 11px 'JetBrains Mono',monospace"; x.fillText("SECURE // " + (d.cat || "").toUpperCase(), 42, 33);
+    x.textAlign = "right"; x.fillStyle = "#f2efe6"; x.fillText(d.idx + " / 14", W - 22, 33);
+    x.textAlign = "left"; x.textBaseline = "alphabetic"; x.fillStyle = "#f2efe6"; x.font = "800 38px Syne, sans-serif";
+    let line = "", yy = 108; const words = (d.title || "").toUpperCase().split(" "), maxw = W - 150;
+    for (const wd of words) { const test = line ? line + " " + wd : wd; if (x.measureText(test).width > maxw && line) { x.fillText(line, 24, yy); line = wd; yy += 38; } else line = test; } if (line) x.fillText(line, 24, yy);
+    let s = seed * 13 + 7; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+    x.strokeStyle = "#c9f24e"; x.lineWidth = 2; x.beginPath();
+    const cx0 = W - 175, cw = 150, cy0 = 135, ch = 58;
+    for (let i = 0; i <= 30; i++) { const xx = cx0 + cw * i / 30, vy = cy0 + ch / 2 - Math.sin(i * 0.5 + seed) * (ch / 2) * (0.4 + 0.6 * rnd()); i ? x.lineTo(xx, vy) : x.moveTo(xx, vy); }
+    x.globalAlpha = 0.85; x.stroke(); x.globalAlpha = 1;
+    x.fillStyle = "rgba(242,239,230,0.5)"; x.font = "500 12px 'JetBrains Mono',monospace"; x.fillText(d.tags || "", 24, H - 44);
+    x.fillStyle = "#c9f24e"; x.fillText("OPEN ↗", 24, H - 20);
+    x.textAlign = "right"; x.fillStyle = "rgba(242,239,230,0.4)"; x.fillText(d.year || "", W - 22, H - 20);
+  }
+  function initArchivePreview() {
+    if (!fine) return;
+    const rows = $$(".archive__row a");
+    if (!rows.length) return;
+    const pop = document.createElement("div"); pop.className = "archive__preview"; pop.setAttribute("aria-hidden", "true");
+    const canvas = document.createElement("canvas"); pop.appendChild(canvas);
+    document.body.appendChild(pop);
+    const xT = hasGSAP ? gsap.quickTo(pop, "x", { duration: 0.4, ease: "power3" }) : null;
+    const yT = hasGSAP ? gsap.quickTo(pop, "y", { duration: 0.4, ease: "power3" }) : null;
+    const wdt = () => pop.offsetWidth || 400, hgt = () => pop.offsetHeight || 250;
+    const move = (e) => {
+      let px = e.clientX + 28; if (px + wdt() > innerWidth - 12) px = e.clientX - 28 - wdt();
+      const py = clamp(e.clientY - hgt() / 2, 12, innerHeight - hgt() - 12);
+      if (xT) { xT(px); yT(py); } else { pop.style.left = px + "px"; pop.style.top = py + "px"; }
+    };
+    rows.forEach((a, i) => {
+      const data = {
+        idx: (a.querySelector(".archive__idx")?.textContent || "").trim(),
+        title: (a.querySelector(".archive__title")?.textContent || "Project").trim(),
+        cat: (a.querySelector(".archive__cat")?.textContent || "").trim(),
+        tags: (a.querySelector(".archive__tags")?.textContent || "").trim(),
+        year: (a.querySelector(".archive__year")?.textContent || "").trim(),
+      };
+      a.addEventListener("pointerenter", (e) => {
+        drawArchiveCard(canvas, data, parseInt(data.idx, 10) || i + 1);
+        pop.classList.add("is-on"); move(e);
+        if (hasGSAP && !reduced) gsap.fromTo(pop, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.35, ease: "power3.out" });
+        else pop.style.opacity = "1";
+      });
+      a.addEventListener("pointermove", move);
+      a.addEventListener("pointerleave", () => {
+        pop.classList.remove("is-on");
+        if (hasGSAP && !reduced) gsap.to(pop, { opacity: 0, scale: 0.94, duration: 0.25 }); else pop.style.opacity = "0";
+      });
+    });
+  }
+
+  /* ── command palette (⌘K) ────────────────────────────────── */
   function initCommandPalette() {
     const root = document.createElement("div");
     root.className = "cmdk"; root.setAttribute("hidden", "");
@@ -801,28 +892,33 @@
     });
   }
 
-  /* ── preloader ──────────────────────────────────────────────────────── */
+  /* ── preloader ────────────────────────────────────────── */
   function runLoader(done) {
     const loader = $("#loader");
     if (!motion || !loader) { if (loader) loader.style.display = "none"; done(); return; }
-    const fill = $("#loaderFill"), pct = $("#loaderPct");
-    const words = $$(".loader__word [data-word]");
+    const fill = $("#loaderFill"), pct = $("#loaderPct"), state = $("#loaderState");
+    const lines = $$("#bootLog .boot__line"), grant = $("#bootGrant");
     const tl = gsap.timeline({ defaults: { ease: "power3.out" }, onComplete: done });
-    words.forEach((wd, i) => {
-      tl.fromTo(wd, { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.4 }, i * 0.32 + 0.1);
-      if (i < words.length - 1) tl.to(wd, { yPercent: -100, opacity: 0, duration: 0.4 }, i * 0.32 + 0.42);
-    });
+    if (lines.length) tl.from(lines, { opacity: 0, x: -12, duration: 0.4, stagger: 0.16 }, 0.1);
     const c = { v: 0 };
     tl.to(c, { v: 100, duration: 1.9, ease: "power2.inOut", onUpdate: () => {
       const v = Math.round(c.v);
       if (pct) pct.textContent = v;
       if (fill) fill.style.width = v + "%";
+      if (state) state.textContent = v < 100 ? "MOUNTING" : "READY";
+      lines.forEach((ln) => {
+        if (v >= +ln.dataset.at && !ln.classList.contains("is-ok")) {
+          ln.classList.add("is-ok");
+          const s = ln.querySelector(".boot__stat"); if (s) s.textContent = "[ OK ]";
+        }
+      });
     } }, 0);
-    tl.to(".loader__inner", { opacity: 0, duration: 0.4 }, "+=0.1");
-    tl.to(loader, { yPercent: -100, duration: 1.0, ease: "power4.inOut" }, "-=0.1");
+    if (grant) tl.to(grant, { opacity: 1, duration: 0.4 }, "-=0.1");
+    tl.to(".loader__inner", { opacity: 0, duration: 0.45 }, "+=0.3");
+    tl.to(loader, { yPercent: -100, duration: 1.0, ease: "power4.inOut" }, "-=0.05");
   }
 
-  /* ── boot ───────────────────────────────────────────────────────────── */
+  /* ── boot ────────────────────────────────────────────── */
   function start() {
     document.body.classList.remove("is-loading");
     initSmooth();
@@ -853,6 +949,8 @@
   initApproachPipeline();
   initCommandPalette();
   initTerminal();
+  initArchivePreview();
+  initContactReveal();
 
   runLoader(start);
 
