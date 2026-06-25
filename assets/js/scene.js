@@ -61,7 +61,7 @@
     document.querySelector(".stage3d")?.remove();
   }
 
-  // ── procedural "dashboard" texture for a project ────────────────────────
+  // ── procedural "dashboard" texture for a project ────────────────────
   function dashboardCanvas(p, idx) {
     const W = 1280, H = 720;
     const c = document.createElement("canvas"); c.width = W; c.height = H;
@@ -98,8 +98,9 @@
     x.fillText(p.num + " / " + String(projects.length).padStart(2, "0"), W - 58, 72);
     x.strokeStyle = "rgba(242,239,230,0.12)"; x.lineWidth = 1;
     x.beginPath(); x.moveTo(60, 108); x.lineTo(W - 58, 108); x.stroke();
-    // title
-    x.textAlign = "left"; x.textBaseline = "alphabetic"; x.fillStyle = BONE;
+    // title (softened just below the bloom knee so post-bloom can't smear the
+    // glyphs together — keeps the Syne "Q" in "DQN" legible)
+    x.textAlign = "left"; x.textBaseline = "alphabetic"; x.fillStyle = "#e7e4db";
     x.font = "800 100px Syne, sans-serif";
     wrap(x, p.title.toUpperCase(), 60, 256, 770, 92);
     // highlight metric pill
@@ -153,7 +154,7 @@
     return g;
   }
 
-  // ── build the whole scene ───────────────────────────────────────────────
+  // ── build the whole scene ──────────────────────────────────────
   async function build() {
     // overlay shell
     const stage = document.createElement("div");
@@ -236,7 +237,7 @@
       composer = new EffectComposer(renderer);
       composer.addPass(new RenderPass(scene, camera));
       // restrained post: subtle glow + a whisper of aberration (keeps text crisp)
-      const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.42, 0.35, 0.85);
+      const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.30, 0.28, 0.85);
       composer.addPass(bloom);
       const rgb = new ShaderPass(RGBShiftShader); rgb.uniforms.amount.value = 0.0006; composer.addPass(rgb);
       composer.addPass(new OutputPass());
@@ -292,6 +293,9 @@
       const time = clock.getElapsedTime();
       t += (target - t) * 0.08;
       layout(time);
+      // the whole carousel leans gently toward the cursor — parallax depth
+      group.rotation.y += (mouse.x * 0.10 - group.rotation.y) * 0.04;
+      group.rotation.x += (-mouse.y * 0.06 - group.rotation.x) * 0.04;
       camera.position.x += (mouse.x * 1.4 - camera.position.x) * 0.05;
       camera.position.y += (mouse.y * 0.9 - camera.position.y) * 0.05;
       camera.lookAt(0, 0, 0);
