@@ -69,8 +69,9 @@
     .hero__title { position: relative; z-index: 2; font-family: var(--font-display); font-weight: 800;
       font-size: clamp(2.3rem, 5.4vw, 5rem); line-height: 0.96; letter-spacing: -0.04em;
       width: max-content; max-width: min(48vw, 600px); }
-    .hero__title .line { display: block; overflow: hidden; }
-    .hero__title .line__in { display: block; white-space: nowrap; }
+    .hero__tline { display: block; white-space: nowrap; animation: herotline 0.85s var(--ease) both; }
+    @keyframes herotline { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .hero__tline { animation: none; } }
     .hero__hello { display: inline-block; color: var(--accent); transition: opacity .28s var(--ease); }
     .hero__role { font-family: var(--font-mono); font-weight: 500; font-size: clamp(1rem, 2vw, 1.55rem);
       letter-spacing: 0.02em; margin-top: 1rem; color: var(--fg); }
@@ -109,6 +110,9 @@
 
     /* portrait sits behind the console */
     .hero__portrait { height: min(88vh, 980px); right: 0; z-index: 1; opacity: 0.92; }
+
+    /* keep the custom cursor ring off the hero / portrait — use the native cursor here */
+    html.has-cursor #hero, html.has-cursor #hero * { cursor: auto !important; }
 
     @media (max-width: 1100px) { .hero__console { display: none; } .hero__lead { max-width: 78%; }
       .hero__portrait { height: 60vh; opacity: 0.5; } }
@@ -202,8 +206,8 @@
           <i></i> Focus — <span class="hero__rotate" id="heroRotate">Application Security</span>
         </p>
         <h1 class="hero__title">
-          <span class="line"><span class="line__in" data-hero="line"><span class="hero__hello" id="heroHello">Hello</span></span></span>
-          <span class="line"><span class="line__in" data-hero="line">I'm Abubakar</span></span>
+          <span class="hero__tline"><span class="hero__hello" id="heroHello">Hello</span></span>
+          <span class="hero__tline">I'm Abubakar</span>
         </h1>
         <p class="hero__role" data-hero="tag"><span class="accent-text">Cyber Security Engineer</span><b class="hero__caret">_</b></p>
         <p class="hero__tagline" data-hero="tag">
@@ -800,6 +804,14 @@ Date:   2025 — 2026 · GIKI · Physical-Layer Security</div>
   <!-- ░░ HERO: multilingual greeting + live console ░░ -->
   <script>
   (function () {
+    /* keep the custom cursor ring off the hero / portrait */
+    var heroSec = document.getElementById('hero');
+    var curEl = document.querySelector('.cursor');
+    if (heroSec && curEl) {
+      heroSec.addEventListener('pointermove', function () { curEl.style.opacity = '0'; });
+      heroSec.addEventListener('pointerleave', function () { curEl.style.opacity = ''; });
+    }
+
     /* rotating greeting in different languages */
     var hello = document.getElementById('heroHello');
     if (hello) {
