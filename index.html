@@ -63,6 +63,18 @@
     .hero__title .line__in, [data-split] .split-line > span { transform: none !important; }
     .manifesto__text .w { opacity: 1 !important; }
   </style></noscript>
+  <style>
+    .hero__title { font-family: var(--font-mono); font-weight: 500; font-size: clamp(2rem, 5vw, 4.2rem); line-height: 1.1; letter-spacing: -0.02em; }
+    .hero__title .line__in { white-space: nowrap; }
+    .hero__role { font-family: var(--font-mono); font-weight: 500; font-size: clamp(1.05rem, 2.4vw, 1.85rem); letter-spacing: 0.01em; margin-top: 0.75rem; }
+    .hero__role .accent-text { color: var(--accent); }
+    .hero__caret { color: var(--accent); font-weight: 400; animation: herocaret 1.1s steps(1) infinite; }
+    @keyframes herocaret { 50% { opacity: 0; } }
+    .hero__lead { max-width: min(52%, 54ch); }
+    .hero__portrait { height: min(92vh, 1020px); right: 0; }
+    @media (max-width: 1024px) { .hero__portrait { height: 60vh; opacity: 0.7; } .hero__lead { max-width: 80%; } }
+    @media (max-width: 768px) { .hero__portrait { height: 48vh; opacity: 0.38; } .hero__lead { max-width: 100%; } }
+  </style>
 </head>
 <body>
   <a class="skip-link" href="#work">Skip to work</a>
@@ -138,7 +150,7 @@
       <div class="hero__grid" aria-hidden="true"></div>
       <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
       <div class="hero__portrait">
-        <img src="assets/img/portrait.webp" alt="Muhammad Abubakar" width="900" height="1316" decoding="async" />
+        <img src="assets/img/portrait.webp" alt="Muhammad Abubakar" width="1170" height="1647" decoding="async" />
       </div>
 
       <div class="hero__top">
@@ -151,9 +163,9 @@
           <i></i> Focus — <span class="hero__rotate" id="heroRotate">Application Security</span>
         </p>
         <h1 class="hero__title">
-          <span class="line"><span class="line__in" data-hero="line">MUHAMMAD</span></span>
-          <span class="line"><span class="line__in line__in--stroke" data-hero="line">ABUBAKAR</span></span>
+          <span class="line"><span class="line__in" data-hero="line">Hi, I'm Abubakar</span></span>
         </h1>
+        <p class="hero__role" data-hero="tag"><span class="accent-text">Cyber Security Engineer</span><b class="hero__caret">_</b></p>
         <p class="hero__tagline" data-hero="tag">
           I engineer security into every layer — from the <em>physical wire</em>
           to the <em>web</em>: modeling adversaries, gating pipelines, and turning
