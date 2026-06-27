@@ -79,42 +79,13 @@
     .hero__caret { color: var(--accent); font-weight: 400; animation: herocaret 1.1s steps(1) infinite; }
     @keyframes herocaret { 50% { opacity: 0; } }
 
-    /* ── right-side live security console ── */
-    .hero__console { position: absolute; z-index: 2; right: clamp(1.1rem, 4vw, 4.5rem); top: 50%;
-      transform: translate(0, calc(-50% + 18px)); opacity: 0; width: min(40vw, 460px);
-      background: rgba(13,14,17,0.74); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
-      box-shadow: 0 40px 90px -34px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.05);
-      animation: consolein 0.9s var(--ease) 0.55s forwards; }
-    @keyframes consolein { to { opacity: 1; transform: translate(0, -50%); } }
-    .console__bar { display: flex; align-items: center; gap: 0.6rem; padding: 0.62rem 0.9rem;
-      border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.025); }
-    .console__dots { display: flex; gap: 0.42rem; }
-    .console__dots i { width: 9px; height: 9px; border-radius: 50%; background: #3a3a40; }
-    .console__dots i:first-child { background: #ff5f57; }
-    .console__dots i:nth-child(2) { background: #febc2e; }
-    .console__dots i:nth-child(3) { background: #28c840; }
-    .console__name { font-family: var(--font-mono); font-size: 0.66rem; color: var(--muted); letter-spacing: 0.03em; }
-    .console__live { margin-left: auto; display: inline-flex; align-items: center; gap: 0.42rem;
-      font-family: var(--font-mono); font-size: 0.58rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.14em; }
-    .console__live b { width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
-      box-shadow: 0 0 8px var(--accent); animation: cblink 1.4s ease-in-out infinite; }
-    @keyframes cblink { 50% { opacity: 0.22; } }
-    .console__body { margin: 0; padding: 1.05rem 1.15rem 1.35rem; font-family: var(--font-mono);
-      font-size: 0.8rem; line-height: 1.75; color: var(--fg); min-height: 252px; white-space: pre-wrap; word-break: break-word; }
-    .console__body .c-p { color: var(--accent); }
-    .console__body .c-o { color: var(--muted); }
-    .console__body .c-k { color: var(--accent); }
-    .console__cur { display: inline-block; width: 8px; height: 1.05em; background: var(--accent);
-      vertical-align: -0.16em; margin-left: 1px; animation: cblink 1s steps(1) infinite; }
-
-    /* portrait sits behind the console */
-    .hero__portrait { height: min(88vh, 980px); right: 0; z-index: 1; opacity: 0.92; }
+    /* portrait fills the right side of the hero */
+    .hero__portrait { height: min(90vh, 1000px); right: 0; z-index: 1; opacity: 0.95; }
 
     /* keep the custom cursor ring off the hero / portrait — use the native cursor here */
     html.has-cursor #hero, html.has-cursor #hero * { cursor: auto !important; }
 
-    @media (max-width: 1100px) { .hero__console { display: none; } .hero__lead { max-width: 78%; }
+    @media (max-width: 1100px) { .hero__lead { max-width: 78%; }
       .hero__portrait { height: 60vh; opacity: 0.5; } }
     @media (max-width: 768px) { .hero__portrait { height: 50vh; opacity: 0.3; } .hero__lead { max-width: 100%; } }
   </style>
@@ -216,15 +187,6 @@
           raw threat into hardened systems.
         </p>
       </div>
-
-      <aside class="hero__console" data-hero="console" aria-hidden="true">
-        <div class="console__bar">
-          <span class="console__dots"><i></i><i></i><i></i></span>
-          <span class="console__name">abubakar@vyrex:~</span>
-          <span class="console__live"><b></b> live</span>
-        </div>
-        <pre class="console__body" id="consoleBody"></pre>
-      </aside>
 
       <div class="hero__bottom">
         <a href="#work" class="hero__cue" data-cursor="link" data-hero="cue" aria-label="Scroll to work">
@@ -801,74 +763,29 @@ Date:   2025 — 2026 · GIKI · Physical-Layer Security</div>
   <script src="assets/js/main.js"></script>
   <script type="module" src="assets/js/scene.js"></script>
 
-  <!-- ░░ HERO: multilingual greeting + live console ░░ -->
+  <!-- ░░ HERO: multilingual greeting ░░ -->
   <script>
   (function () {
     /* keep the custom cursor ring off the hero / portrait */
     var heroSec = document.getElementById('hero');
     var curEl = document.querySelector('.cursor');
     if (heroSec && curEl) {
-      heroSec.addEventListener('pointermove', function () { curEl.style.opacity = '0'; });
+      var hideCur = function () { curEl.style.opacity = '0'; };
+      heroSec.addEventListener('pointerenter', hideCur);
+      heroSec.addEventListener('pointermove', hideCur);
       heroSec.addEventListener('pointerleave', function () { curEl.style.opacity = ''; });
     }
 
     /* rotating greeting in different languages */
     var hello = document.getElementById('heroHello');
-    if (hello) {
-      var greets = ['Hello','Hola','Bonjour','Ciao','Olá','Hallo','你好','こんにちは','안녕하세요','नमस्ते','مرحبا','Привет','Γειά σου','Salam','Hej'];
-      var gi = 0;
-      setInterval(function () {
-        gi = (gi + 1) % greets.length;
-        hello.style.opacity = '0';
-        setTimeout(function () { hello.textContent = greets[gi]; hello.style.opacity = '1'; }, 280);
-      }, 2300);
-    }
-
-    /* live security console — typewriter loop */
-    var body = document.getElementById('consoleBody');
-    if (!body) return;
-    var seq = [
-      { p: '$ ', t: 'whoami' },
-      { o: 'muhammad abubakar · cyber security engineer' },
-      { p: '$ ', t: 'cat ./focus.txt' },
-      { o: 'AppSec · DevSecOps · ML-Driven Defense' },
-      { p: '$ ', t: './harden --target pipeline' },
-      { o: 'scanning  [##########] 100%' },
-      { k: '✓ 0 criticals · supply-chain signed · zero-trust on' },
-      { p: '$ ', t: 'status --availability' },
-      { k: '● available for 2027 — open to work' }
-    ];
-    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
-    function renderLine(s, upto) {
-      if (s.p !== undefined) return '<span class="c-p">' + esc(s.p) + '</span>' + esc((s.t || '').slice(0, upto));
-      if (s.k !== undefined) return '<span class="c-k">' + esc(s.k) + '</span>';
-      return '<span class="c-o">' + esc(s.o) + '</span>';
-    }
-    var line = 0, ci = 0, cursor = '<span class="console__cur"></span>';
-    function render() {
-      var html = '';
-      for (var i = 0; i < line; i++) html += renderLine(seq[i], seq[i].t ? seq[i].t.length : 0) + '\n';
-      if (line < seq.length) html += renderLine(seq[line], ci);
-      body.innerHTML = html + cursor;
-    }
-    if (reduce) {
-      line = seq.length; render();
-      return;
-    }
-    function step() {
-      var s = seq[line];
-      if (!s) { setTimeout(reset, 2800); return; }
-      if (s.t !== undefined) {
-        if (ci < s.t.length) { ci++; render(); setTimeout(step, 55 + Math.random() * 45); }
-        else { line++; ci = 0; render(); setTimeout(step, 360); }
-      } else {
-        line++; ci = 0; render(); setTimeout(step, 520);
-      }
-    }
-    function reset() { line = 0; ci = 0; render(); setTimeout(step, 700); }
-    render();
-    setTimeout(step, 1300);
+    if (!hello) return;
+    var greets = ['Hello','Hola','Bonjour','Ciao','Olá','Hallo','你好','こんにちは','안녕하세요','नमस्ते','مرحبا','Привет','Γειά σου','Salam','Hej'];
+    var gi = 0;
+    setInterval(function () {
+      gi = (gi + 1) % greets.length;
+      hello.style.opacity = '0';
+      setTimeout(function () { hello.textContent = greets[gi]; hello.style.opacity = '1'; }, 280);
+    }, 2300);
   })();
   </script>
 </body>
