@@ -57,6 +57,7 @@
     eraser: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 15 6.5-6.5a2 2 0 0 1 2.8 0l4.2 4.2a2 2 0 0 1 0 2.8L14 20H8l-4-4Z"/><path d="M9 20h11"/></svg>',
     dice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="16" cy="16" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>',
     trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>',
+    attack: '<svg viewBox="0 0 24 24" fill="none" stroke="#ff5f57" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="2.4" fill="#ff5f57" stroke="none"/></svg>',
   };
 
   let root = null, zTop = 30, built = false;
@@ -113,7 +114,7 @@
 
         <div class="os-toast" id="osToast">
           <h5>Welcome to <b>Abubakar Linux</b></h5>
-          <p>A portfolio that boots like an OS. Try the <b>Terminal</b> (type <b>help</b>) or build a world in <b>Krypt Craft</b> 🧊 — a voxel sandbox in the dock.</p>
+          <p>A portfolio that boots like an OS. Type <b>help</b> in the Terminal, build in <b>Krypt Craft</b> 🧊, or open <b>Let's Attack</b> ⚔ and watch a live cyber-defense battle.</p>
         </div>
       </div>`;
   }
@@ -126,6 +127,7 @@
     { id: "skills",   label: "Skills",    icon: I.skills,  file: "skills.md" },
     { id: "contact",  label: "Contact",   icon: I.mail,    file: "contact.vcf" },
     { id: "craft",    label: "Krypt Craft", icon: I.cube,  file: "craft.vox" },
+    { id: "attack",   label: "Let's Attack", icon: I.attack, file: "attack.sh" },
     { id: "browser",  label: "Browser",   icon: I.browser, file: "github" },
   ];
 
@@ -321,7 +323,7 @@
     const sizes = {
       about:    [640, 440], projects: [720, 520], files: [640, 420],
       terminal: [620, 420], skills:   [640, 460], contact: [520, 380], browser: [720, 500],
-      craft:    [800, 580],
+      craft:    [800, 580], attack: [880, 560],
     };
     let [w, h] = sizes[id] || [560, 400];
     w = Math.min(w, vw - 40); h = Math.min(h, vh - 90);
@@ -401,6 +403,7 @@
       case "skills": return skillsHTML();
       case "contact": return contactHTML();
       case "craft": return craftHTML();
+      case "attack": return attackHTML();
       case "browser": return browserHTML();
       default: return "";
     }
@@ -535,6 +538,7 @@
     });
     if (id === "terminal") initTerminal(w.querySelector("#osTermBody"));
     if (id === "craft") initCraft(w);
+    if (id === "attack") initAttack(w);
   }
 
   /* ── interactive terminal ─────────────────────────────────────── */
@@ -563,7 +567,8 @@
   <span class="g">contact</span>     how to reach me
   <span class="g">neofetch</span>    system info
   <span class="g">social</span>      links
-  <span class="g">open</span> &lt;app&gt;  launch about|projects|skills|contact|files|browser
+  <span class="g">open</span> &lt;app&gt;  launch about|projects|skills|contact|files|craft|attack|browser
+  <span class="g">attack</span>      launch the live cyber-attack simulation
   <span class="g">sudo</span>        try it
   <span class="g">clear</span>       clear the screen
   <span class="g">exit</span>        back to the classic site`,
@@ -584,6 +589,7 @@ phone:    <span class="c">${DATA.phone}</span>`,
       social: () => `github    ${DATA.github}\nlinkedin  ${DATA.linkedin}`,
       neofetch: () => neofetch(),
       sudo: () => `<span class="w">[sudo]</span> password for ${DATA.user}: <span class="dim">****</span>\n<span class="c">Nice try.</span> This portfolio runs on trust, not root. 🙂`,
+      attack: () => { openApp("attack"); return `<span class="w">[!]</span> spinning up hostile traffic… watch the perimeter. <span class="g">attack sim launched.</span>`; },
       ls: () => `<span class="c">README.txt</span>  <span class="c">skills.md</span>  <span class="c">contact.vcf</span>  <span class="m">projects/</span>  <span class="m">.secrets/</span>`,
       "cat readme.txt": () => commands.about(),
       "cd .secrets": () => `<span class="w">permission denied</span> — some things stay air-gapped.`,
@@ -605,7 +611,7 @@ phone:    <span class="c">${DATA.phone}</span>`,
       if (cmd === "open") {
         const t = (parts[1]||"").toLowerCase();
         if (APPS.find((a)=>a.id===t)) { print(`opening <span class="g">${t}</span>…`); openApp(t); }
-        else print(`<span class="w">open:</span> unknown app '${esc(parts[1]||"")}'. try about|projects|skills|contact|files|browser`);
+        else print(`<span class="w">open:</span> unknown app '${esc(parts[1]||"")}'. try about|projects|skills|contact|files|craft|attack|browser`);
         return;
       }
       if (cmd === "echo") { print(esc(commands.echo(parts.slice(1)))); return; }
@@ -1065,10 +1071,288 @@ phone:    <span class="c">${DATA.phone}</span>`,
     setHud();
   }
 
+  /* ── LET'S ATTACK — automated attack visualisation ────────────── */
+  const ATK_TECH = [
+    ["SQL injection probe", "T1190"], ["credential stuffing", "T1110"],
+    ["port sweep", "T1595"], ["XSS payload", "T1059.007"],
+    ["ransomware dropper", "T1486"], ["DNS tunnelling", "T1071.004"],
+    ["zero-day attempt", "T1203"], ["LDAP injection", "T1190"],
+    ["session hijack", "T1563"], ["supply-chain probe", "T1195"],
+  ];
+  const ATK_NODES = ["WEB", "API", "DB", "MAIL", "IOT", "VPN"];
+
+  function attackHTML() {
+    return `<div class="os-atk">
+      <div class="os-atk__main">
+        <canvas class="os-atk__canvas"></canvas>
+        <div class="os-atk__bar">
+          <div class="os-atk__stats">
+            <span class="os-atk__meter">THREAT <i><b data-atk="meter"></b></i></span>
+            <span>BLOCKED <b class="g" data-atk="blocked">0</b></span>
+            <span>BREACHES <b class="r" data-atk="breach">0</b></span>
+            <span>HOSTILES <b data-atk="live">0</b></span>
+          </div>
+          <div class="os-craft__tools">
+            <button class="os-craft__btn os-atk__btn--launch" data-atk="launch">${I.attack} Launch wave</button>
+            <button class="os-craft__btn is-on" data-atk="auto">Auto</button>
+          </div>
+        </div>
+      </div>
+      <div class="os-atk__log"><h5><i></i> SOC live feed</h5><div data-atk="loglines"></div></div>
+    </div>`;
+  }
+
+  function initAttack(w) {
+    const cv = w.querySelector(".os-atk__canvas");
+    const ctx = cv.getContext("2d");
+    const logBox = w.querySelector('[data-atk="loglines"]');
+    const el = {
+      meter: w.querySelector('[data-atk="meter"]'), blocked: w.querySelector('[data-atk="blocked"]'),
+      breach: w.querySelector('[data-atk="breach"]'), live: w.querySelector('[data-atk="live"]'),
+    };
+    const S = { attackers: [], packets: [], parts: [], pulses: [], sweep: 0, shake: 0,
+      threat: 10, blocked: 0, breach: 0, auto: true, nextSpawn: 900, cw: 0, ch: 0, last: 0 };
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    const rip = () => `${(rnd(11,223))|0}.${(rnd(0,255))|0}.${(rnd(0,255))|0}.${(rnd(1,254))|0}`;
+
+    function resize() {
+      const r = cv.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+      S.cw = r.width; S.ch = r.height;
+      cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    new ResizeObserver(resize).observe(w.querySelector(".os-atk__main"));
+
+    const geo = () => {
+      const cx = S.cw / 2, cy = S.ch / 2, R = Math.min(S.cw, S.ch) * 0.30;
+      return { cx, cy, R, FW: R * 1.42 };
+    };
+    const nodePos = (i, g) => {
+      const a = -Math.PI / 2 + (i / ATK_NODES.length) * Math.PI * 2;
+      return { x: g.cx + Math.cos(a) * g.R, y: g.cy + Math.sin(a) * g.R };
+    };
+
+    function log(html, cls) {
+      const d = document.createElement("div");
+      if (cls) d.className = cls;
+      d.innerHTML = html;
+      logBox.appendChild(d);
+      while (logBox.children.length > 60) logBox.firstChild.remove();
+      logBox.parentElement.scrollTop = logBox.parentElement.scrollHeight;
+    }
+    const ts = () => { const d = new Date(), p = (n) => String(n).padStart(2, "0"); return `<span class="dim">${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}</span>`; };
+
+    function spawn() {
+      if (S.attackers.length >= 4) return;
+      const [tech, mitre] = ATK_TECH[(Math.random() * ATK_TECH.length) | 0];
+      const a = { ang: rnd(0, Math.PI * 2), dist: rnd(1.9, 2.35), node: (Math.random() * ATK_NODES.length) | 0,
+        ip: rip(), tech, mitre, state: "scan", t: 0, fireT: 0 };
+      S.attackers.push(a);
+      log(`${ts()} <span class="y">RECON</span> ${a.ip} scanning <span class="c">${ATK_NODES[a.node]}</span> <span class="dim">(${mitre})</span>`);
+    }
+
+    function launchWave() {
+      for (let i = 0; i < 4; i++) setTimeout(spawn, i * 260);
+      log(`${ts()} <span class="r">ALERT</span> coordinated wave inbound — 4 hostiles`, "");
+      S.threat = Math.min(100, S.threat + 12);
+    }
+
+    // controls
+    w.querySelector('[data-atk="launch"]').addEventListener("click", launchWave);
+    const autoBtn = w.querySelector('[data-atk="auto"]');
+    autoBtn.addEventListener("click", () => { S.auto = !S.auto; autoBtn.classList.toggle("is-on", S.auto);
+      log(`${ts()} <span class="c">SYS</span> auto-attack ${S.auto ? "resumed" : "paused"}`); });
+
+    log(`${ts()} <span class="g">[ OK ]</span> VYREX core online — perimeter armed`);
+    log(`${ts()} <span class="c">SYS</span> monitoring ${ATK_NODES.length} segments · IDS active`);
+
+    function step(dt, t) {
+      const g = geo();
+      S.sweep += dt * 0.0009;
+      S.threat = Math.max(8, S.threat - dt * 0.0009);
+      if (S.auto) { S.nextSpawn -= dt; if (S.nextSpawn <= 0) { S.nextSpawn = rnd(2400, 4200); spawn(); } }
+
+      for (const a of S.attackers) {
+        a.t += dt;
+        a.x = g.cx + Math.cos(a.ang) * g.R * a.dist;
+        a.y = g.cy + Math.sin(a.ang) * g.R * a.dist;
+        const n = nodePos(a.node, g);
+        if (a.state === "scan" && a.t > 1300) {
+          a.state = "fire"; a.t = 0;
+          log(`${ts()} <span class="r">ATTACK</span> ${a.ip} → ${ATK_NODES[a.node]}: ${a.tech}`);
+        } else if (a.state === "fire") {
+          a.fireT -= dt;
+          if (a.fireT <= 0) { a.fireT = 150;
+            S.packets.push({ x0: a.x, y0: a.y, x1: n.x, y1: n.y, p: 0, sp: rnd(0.0011, 0.0016),
+              block: Math.random() < 0.78, done: false, node: a.node, ip: a.ip });
+          }
+          if (a.t > 3300) { a.state = "doomed"; a.t = 0;
+            S.pulses.push({ r: 12, tx: a, sp: rnd(0.22, 0.3) });
+            log(`${ts()} <span class="g">DEFENSE</span> countermeasure locked on ${a.ip}`);
+          }
+        }
+      }
+
+      // packets
+      for (const p of S.packets) {
+        p.p += p.sp * dt;
+        const x = p.x0 + (p.x1 - p.x0) * p.p, y = p.y0 + (p.y1 - p.y0) * p.p;
+        const d = Math.hypot(x - g.cx, y - g.cy);
+        if (p.block && !p.done && d <= g.FW) {
+          p.done = true; S.blocked++;
+          burst(x, y, "124,242,200", 6);
+          if (Math.random() < 0.2) log(`${ts()} <span class="g">BLOCK</span> fw drop ${p.ip} <span class="dim">→ ${ATK_NODES[p.node]}</span>`);
+        } else if (!p.block && p.p >= 1 && !p.done) {
+          p.done = true; S.breach++; S.threat = Math.min(100, S.threat + 5); S.shake = 6;
+          burst(p.x1, p.y1, "255,95,87", 12);
+          log(`${ts()} <span class="r">BREACH</span> ${ATK_NODES[p.node]} integrity hit — isolating`, "");
+        }
+      }
+      S.packets = S.packets.filter((p) => !p.done && p.p < 1.05);
+
+      // defense pulses
+      for (const pu of S.pulses) {
+        pu.r += pu.sp * dt;
+        const a = pu.tx;
+        if (a && Math.hypot(a.x - g.cx, a.y - g.cy) <= pu.r && a.state === "doomed") {
+          a.state = "dead";
+          burst(a.x, a.y, "201,242,78", 16);
+          log(`${ts()} <span class="g">KILL</span> ${a.ip} neutralized · segment clean`);
+        }
+      }
+      S.pulses = S.pulses.filter((pu) => pu.r < g.R * 3);
+      S.attackers = S.attackers.filter((a) => a.state !== "dead");
+
+      // particles
+      for (const pt2 of S.parts) { pt2.x += pt2.vx * dt; pt2.y += pt2.vy * dt; pt2.life -= dt * 0.0022; }
+      S.parts = S.parts.filter((pt2) => pt2.life > 0);
+
+      // ambient chatter
+      if (Math.random() < dt * 0.00006) log(`${ts()} <span class="dim">sys integrity check … ok</span>`);
+    }
+
+    function burst(x, y, col, n) {
+      for (let i = 0; i < n; i++) { const a = rnd(0, Math.PI * 2), v = rnd(0.02, 0.11);
+        S.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 1, col }); }
+    }
+
+    function draw(t) {
+      const g = geo();
+      ctx.clearRect(0, 0, S.cw, S.ch);
+      ctx.save();
+      if (S.shake > 0.3) { ctx.translate(rnd(-S.shake, S.shake), rnd(-S.shake, S.shake)); S.shake *= 0.86; }
+
+      // faint polar grid
+      ctx.strokeStyle = "rgba(124,242,200,0.05)";
+      for (let r = g.R * 0.5; r < g.R * 2.6; r += g.R * 0.5) { ctx.beginPath(); ctx.arc(g.cx, g.cy, r, 0, 6.29); ctx.stroke(); }
+
+      // radar sweep
+      const sw = ctx.createConicGradient ? ctx.createConicGradient(S.sweep, g.cx, g.cy) : null;
+      if (sw) { sw.addColorStop(0, "rgba(201,242,78,0.14)"); sw.addColorStop(0.12, "rgba(201,242,78,0)"); sw.addColorStop(1, "rgba(201,242,78,0)");
+        ctx.fillStyle = sw; ctx.beginPath(); ctx.arc(g.cx, g.cy, g.FW, 0, 6.29); ctx.fill(); }
+
+      // firewall ring
+      ctx.setLineDash([7, 7]); ctx.lineDashOffset = -t * 0.012;
+      ctx.strokeStyle = "rgba(124,242,200,0.5)"; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.arc(g.cx, g.cy, g.FW, 0, 6.29); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // spokes + nodes
+      for (let i = 0; i < ATK_NODES.length; i++) {
+        const n = nodePos(i, g);
+        ctx.strokeStyle = "rgba(242,239,230,0.10)";
+        ctx.beginPath(); ctx.moveTo(g.cx, g.cy); ctx.lineTo(n.x, n.y); ctx.stroke();
+      }
+      // defense pulses
+      for (const pu of S.pulses) {
+        ctx.strokeStyle = `rgba(201,242,78,${Math.max(0, 0.55 - pu.r / (g.R * 3) * 0.55)})`;
+        ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(g.cx, g.cy, pu.r, 0, 6.29); ctx.stroke();
+      }
+      // core
+      const pulse = 0.5 + 0.5 * Math.sin(t * 0.003);
+      ctx.fillStyle = `rgba(201,242,78,${0.10 + pulse * 0.08})`;
+      ctx.beginPath(); ctx.arc(g.cx, g.cy, 26 + pulse * 4, 0, 6.29); ctx.fill();
+      ctx.strokeStyle = "rgba(201,242,78,0.9)"; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(g.cx, g.cy, 17, 0, 6.29); ctx.stroke();
+      ctx.fillStyle = "#c9f24e"; ctx.font = "700 9px 'JetBrains Mono', monospace"; ctx.textAlign = "center";
+      ctx.fillText("VYREX", g.cx, g.cy + 3);
+      ctx.fillStyle = "rgba(242,239,230,0.4)"; ctx.font = "8px 'JetBrains Mono', monospace";
+      ctx.fillText("CORE", g.cx, g.cy + 34);
+
+      for (let i = 0; i < ATK_NODES.length; i++) {
+        const n = nodePos(i, g);
+        const hot = S.parts.some((p) => p.col === "255,95,87" && Math.hypot(p.x - n.x, p.y - n.y) < 26);
+        ctx.fillStyle = hot ? "rgba(255,95,87,0.22)" : "rgba(124,242,200,0.10)";
+        ctx.beginPath(); ctx.arc(n.x, n.y, 14, 0, 6.29); ctx.fill();
+        ctx.strokeStyle = hot ? "#ff5f57" : "rgba(124,242,200,0.8)"; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(n.x, n.y, 10, 0, 6.29); ctx.stroke();
+        ctx.fillStyle = hot ? "#ff8a80" : "rgba(242,239,230,0.7)"; ctx.font = "8px 'JetBrains Mono', monospace";
+        ctx.fillText(ATK_NODES[i], n.x, n.y + 24);
+      }
+
+      // attackers
+      for (const a of S.attackers) {
+        if (a.state === "scan") {
+          const n = nodePos(a.node, g);
+          ctx.setLineDash([3, 6]); ctx.strokeStyle = "rgba(255,95,87,0.35)"; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(n.x, n.y); ctx.stroke(); ctx.setLineDash([]);
+        }
+        ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(Math.PI / 4);
+        ctx.fillStyle = a.state === "doomed" ? "rgba(255,95,87,0.5)" : "#ff5f57";
+        ctx.fillRect(-5, -5, 10, 10); ctx.restore();
+        ctx.fillStyle = "rgba(255,138,128,0.75)"; ctx.font = "7px 'JetBrains Mono', monospace";
+        ctx.fillText(a.ip, a.x, a.y - 12);
+      }
+
+      // packets with trails
+      for (const p of S.packets) {
+        const x = p.x0 + (p.x1 - p.x0) * p.p, y = p.y0 + (p.y1 - p.y0) * p.p;
+        const tx = p.x0 + (p.x1 - p.x0) * Math.max(0, p.p - 0.06), ty = p.y0 + (p.y1 - p.y0) * Math.max(0, p.p - 0.06);
+        const gr = ctx.createLinearGradient(tx, ty, x, y);
+        gr.addColorStop(0, "rgba(255,95,87,0)"); gr.addColorStop(1, "rgba(255,95,87,0.9)");
+        ctx.strokeStyle = gr; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(x, y); ctx.stroke();
+      }
+      // particles
+      for (const pt2 of S.parts) {
+        ctx.fillStyle = `rgba(${pt2.col},${pt2.life})`;
+        ctx.beginPath(); ctx.arc(pt2.x, pt2.y, 1.7, 0, 6.29); ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function hud() {
+      el.meter.style.width = S.threat + "%";
+      el.blocked.textContent = S.blocked;
+      el.breach.textContent = S.breach;
+      el.live.textContent = S.attackers.length;
+    }
+
+    // logic on a wall-clock interval (immune to rAF throttling), drawing on rAF
+    let lastStep = performance.now();
+    const stepIv = setInterval(() => {
+      if (!document.body.contains(cv)) { clearInterval(stepIv); return; } // window closed
+      const now = performance.now();
+      const dt = Math.min(200, now - lastStep); lastStep = now;
+      if (!w.classList.contains("is-min")) step(dt, now);
+    }, 33);
+    function loop(t) {
+      if (!document.body.contains(cv)) return;
+      if (!w.classList.contains("is-min")) { draw(t); hud(); }
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(resize);
+    setTimeout(() => { resize(); if (!reduced) launchWave(); }, 350);
+    requestAnimationFrame(loop);
+  }
+
   /* ── enter / exit ─────────────────────────────────────────────── */
   let firstBoot = true;
   function enter() {
     build();
+    markSeen(); dismissHint();
     document.documentElement.classList.add("os-active");
     requestAnimationFrame(() => root.classList.add("is-on"));
     startWall();
@@ -1087,12 +1371,63 @@ phone:    <span class="c">${DATA.phone}</span>`,
     if (btn) btn.setAttribute("aria-pressed", "false");
   }
 
+  /* ── main-site discovery: hero CTA + nav hint bubble ─────────── */
+  const osSeen = () => { try { return !!localStorage.getItem("abkOsBooted"); } catch (_) { return false; } };
+  const markSeen = () => { try { localStorage.setItem("abkOsBooted", "1"); } catch (_) {} };
+
+  function dismissHint() {
+    const el = document.getElementById("osNavHint");
+    if (el) { el.classList.remove("is-on"); setTimeout(() => el.remove(), 450); }
+    const btn = document.getElementById("osToggle");
+    if (btn) btn.classList.remove("is-attn");
+  }
+
+  function initSiteHints() {
+    const btn = document.getElementById("osToggle");
+    if (!btn) return;
+
+    // hero CTA — a second, impossible-to-miss entry point
+    const tag = document.querySelector(".hero__tagline");
+    if (tag && !document.getElementById("osHeroCta")) {
+      tag.insertAdjacentHTML("afterend",
+        `<button class="os-cta" id="osHeroCta" type="button" data-cursor="link" aria-label="Boot Abubakar Linux, the OS version of this portfolio">
+           ▶ Boot <b>Abubakar&nbsp;Linux</b> <em>— explore this portfolio as an OS</em>
+         </button>`);
+      document.getElementById("osHeroCta").addEventListener("click", enter);
+    }
+
+    if (osSeen()) return;
+    btn.classList.add("is-attn");
+
+    // bobbing hint bubble anchored under the nav toggle
+    setTimeout(() => {
+      if (osSeen() || (root && root.classList.contains("is-on"))) return;
+      const r = btn.getBoundingClientRect();
+      if (!r.width) return; // toggle hidden on this viewport
+      const el = document.createElement("div");
+      el.className = "os-navhint"; el.id = "osNavHint";
+      el.innerHTML = `<span class="os-navhint__arrow"></span>psst — this site has an <b>OS mode</b>. hit the switch ☝ <button class="os-navhint__x" aria-label="Dismiss">×</button>`;
+      document.body.appendChild(el);
+      const place = () => {
+        const r2 = btn.getBoundingClientRect();
+        if (!r2.width) { el.classList.remove("is-on"); return; }
+        el.style.top = r2.bottom + 13 + "px";
+        el.style.left = Math.min(window.innerWidth - 150, r2.left + r2.width / 2) + "px";
+      };
+      place();
+      window.addEventListener("resize", place);
+      requestAnimationFrame(() => el.classList.add("is-on"));
+      el.querySelector(".os-navhint__x").addEventListener("click", () => { markSeen(); dismissHint(); });
+    }, 2600);
+  }
+
   /* ── toggle button wiring ─────────────────────────────────────── */
   function boot() {
     const btn = document.getElementById("osToggle");
     if (btn) btn.addEventListener("click", () => {
       if (root && root.classList.contains("is-on")) exit(); else enter();
     });
+    initSiteHints();
     // deep-link: /#os boots straight into the OS
     if (location.hash === "#os") setTimeout(enter, 400);
   }
