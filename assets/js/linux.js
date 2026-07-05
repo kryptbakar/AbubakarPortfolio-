@@ -78,7 +78,9 @@
   function shell() {
     return `
       <div class="os-wallpaper"></div>
+      <canvas class="os-wall" id="osWall"></canvas>
       <div class="os-grain"></div>
+      <div class="os-scanlines" aria-hidden="true"></div>
 
       <div class="os-boot" id="osBoot">
         <div class="os-boot__inner">
@@ -164,6 +166,9 @@
       m.addEventListener("click", () => openApp(m.dataset.open)));
 
     root.querySelector("#osExit").addEventListener("click", exit);
+
+    initWall();
+    initDockMag();
 
     // clock
     const clock = root.querySelector("#osClock");
@@ -662,6 +667,196 @@ phone:    <span class="c">${DATA.phone}</span>`,
     return `<div class="os-neofetch"><pre>${art}</pre><div class="os-neofetch__info">${info}</div></div>`;
   }
 
+  /* ── live wallpaper — synthwave grid, horizon sun, stars, 3D wires ── */
+  const wall = { raf: 0, mx: 0, my: 0, px: 0, py: 0, t0: 0 };
+
+  function polyEdges(verts) {
+    // connect every pair at the minimum vertex distance = the solid's edges
+    let min = Infinity;
+    for (let i = 0; i < verts.length; i++) for (let j = i + 1; j < verts.length; j++) {
+      const d = dist2(verts[i], verts[j]); if (d < min - 1e-6) min = d;
+    }
+    const e = [];
+    for (let i = 0; i < verts.length; i++) for (let j = i + 1; j < verts.length; j++)
+      if (Math.abs(dist2(verts[i], verts[j]) - min) < 1e-4) e.push([i, j]);
+    return e;
+  }
+  const dist2 = (a, b) => (a[0]-b[0])**2 + (a[1]-b[1])**2 + (a[2]-b[2])**2;
+  const norm3 = (vs) => { const m = Math.max(...vs.map((v)=>Math.hypot(...v))); return vs.map((v)=>v.map((c)=>c/m)); };
+
+  function mkSolids() {
+    const P = (1 + Math.sqrt(5)) / 2;
+    const ico = norm3([[-1,P,0],[1,P,0],[-1,-P,0],[1,-P,0],[0,-1,P],[0,1,P],[0,-1,-P],[0,1,-P],[P,0,-1],[P,0,1],[-P,0,-1],[-P,0,1]]);
+    const cube = norm3([[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]]);
+    const octa = norm3([[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]]);
+    return [
+      { v: ico,  e: polyEdges(ico),  fx: .15, fy: .26, s: 74, ra: .00028, rb: .00019, bob: 0.0, col: "201,242,78" },
+      { v: cube, e: polyEdges(cube), fx: .85, fy: .20, s: 56, ra: -.00021, rb: .00031, bob: 2.1, col: "124,242,200" },
+      { v: octa, e: polyEdges(octa), fx: .70, fy: .40, s: 44, ra: .00035, rb: -.00023, bob: 4.2, col: "199,140,255" },
+    ];
+  }
+
+  function initWall() {
+    const c = root.querySelector("#osWall");
+    if (!c) return;
+    wall.c = c; wall.ctx = c.getContext("2d");
+    wall.stars = Array.from({ length: 150 }, () => ({
+      x: Math.random(), y: Math.random() * 0.55,
+      r: 0.4 + Math.random() * 1.3, p: Math.random() * 6.28, s: 0.5 + Math.random() * 1.6,
+    }));
+    wall.shoots = []; wall.nextShoot = 2500;
+    wall.shapes = mkSolids();
+    root.addEventListener("pointermove", (e) => {
+      wall.mx = (e.clientX / window.innerWidth) * 2 - 1;
+      wall.my = (e.clientY / window.innerHeight) * 2 - 1;
+    }, { passive: true });
+    window.addEventListener("resize", wallResize);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stopWall();
+      else if (root.classList.contains("is-on")) startWall();
+    });
+    wallResize();
+  }
+
+  function wallResize() {
+    if (!wall.c) return;
+    const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    wall.w = window.innerWidth; wall.h = window.innerHeight;
+    wall.c.width = Math.round(wall.w * dpr);
+    wall.c.height = Math.round(wall.h * dpr);
+    wall.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (!wall.raf) wallFrame(performance.now()); // repaint static frame when paused
+  }
+
+  function startWall() {
+    if (!wall.c || wall.raf) return;
+    if (reduced) { wallFrame(performance.now()); return; }
+    const loop = (t) => { wallFrame(t); wall.raf = requestAnimationFrame(loop); };
+    wall.raf = requestAnimationFrame(loop);
+  }
+  function stopWall() { if (wall.raf) { cancelAnimationFrame(wall.raf); wall.raf = 0; } }
+
+  function wallFrame(t) {
+    const { ctx, w, h } = wall; if (!ctx) return;
+    ctx.clearRect(0, 0, w, h);
+    // eased mouse parallax
+    wall.px += (wall.mx - wall.px) * 0.045;
+    wall.py += (wall.my - wall.py) * 0.045;
+    const cx = w / 2 + wall.px * 26;
+    const hy = h * 0.58 + wall.py * 12; // horizon
+
+    // — stars —
+    for (const s of wall.stars) {
+      const sy = s.y * h;
+      if (sy > hy - 14) continue;
+      const a = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(t * 0.001 * s.s + s.p));
+      ctx.globalAlpha = a;
+      ctx.fillStyle = "#f2efe6";
+      ctx.beginPath(); ctx.arc(s.x * w + wall.px * -8, sy, s.r, 0, 6.29); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // — shooting stars —
+    wall.nextShoot -= 16.7;
+    if (wall.nextShoot <= 0 && !reduced) {
+      wall.nextShoot = 3200 + Math.random() * 3800;
+      wall.shoots.push({ x: Math.random() * w * 0.8, y: Math.random() * hy * 0.4,
+        vx: 7 + Math.random() * 5, vy: 2 + Math.random() * 2, life: 1 });
+    }
+    wall.shoots = wall.shoots.filter((sh) => sh.life > 0);
+    for (const sh of wall.shoots) {
+      const g = ctx.createLinearGradient(sh.x - sh.vx * 9, sh.y - sh.vy * 9, sh.x, sh.y);
+      g.addColorStop(0, "rgba(201,242,78,0)"); g.addColorStop(1, `rgba(242,239,230,${0.85 * sh.life})`);
+      ctx.strokeStyle = g; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(sh.x - sh.vx * 9, sh.y - sh.vy * 9); ctx.lineTo(sh.x, sh.y); ctx.stroke();
+      sh.x += sh.vx; sh.y += sh.vy; sh.life -= 0.022;
+    }
+
+    // — horizon sun with slats —
+    const r = Math.min(w, h) * 0.17;
+    const sunY = hy - r * 0.30;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, sunY, r, 0, 6.29); ctx.clip();
+    const sg = ctx.createLinearGradient(cx, sunY - r, cx, sunY + r);
+    sg.addColorStop(0, "rgba(234,255,158,0.95)");
+    sg.addColorStop(0.55, "rgba(201,242,78,0.75)");
+    sg.addColorStop(1, "rgba(124,242,200,0.28)");
+    ctx.fillStyle = sg; ctx.fillRect(cx - r, sunY - r, r * 2, r * 2);
+    ctx.globalCompositeOperation = "destination-out";
+    for (let i = 0; i < 6; i++) {
+      const sy2 = sunY + r * (0.08 + i * 0.155);
+      ctx.fillRect(cx - r, sy2, r * 2, 2 + i * 1.7);
+    }
+    ctx.restore();
+    const glow = ctx.createRadialGradient(cx, sunY, r * 0.2, cx, sunY, r * 2.4);
+    glow.addColorStop(0, "rgba(201,242,78,0.16)"); glow.addColorStop(1, "rgba(201,242,78,0)");
+    ctx.fillStyle = glow; ctx.fillRect(cx - r * 2.4, sunY - r * 2.4, r * 4.8, r * 4.8);
+
+    // — floating wireframe solids —
+    for (const s of wall.shapes) {
+      const a = t * s.ra, b = t * s.rb;
+      const ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b);
+      const X = s.fx * w + wall.px * -42;
+      const Y = s.fy * h + wall.py * -22 + Math.sin(t * 0.0006 + s.bob) * 10;
+      const pts = s.v.map(([x, y, z]) => {
+        let X1 = x * ca - z * sa, Z1 = x * sa + z * ca;         // rot Y
+        let Y1 = y * cb - Z1 * sb, Z2 = y * sb + Z1 * cb;       // rot X
+        const f = 2.6 / (2.6 + Z2);
+        return [X + X1 * s.s * f, Y + Y1 * s.s * f, Z2];
+      });
+      for (const [i, j] of s.e) {
+        const d = 1 - (pts[i][2] + pts[j][2]) / 4; // depth-fade
+        ctx.strokeStyle = `rgba(${s.col},${0.16 + 0.3 * d})`;
+        ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.moveTo(pts[i][0], pts[i][1]); ctx.lineTo(pts[j][0], pts[j][1]); ctx.stroke();
+      }
+      ctx.fillStyle = `rgba(${s.col},0.75)`;
+      for (const p of pts) { ctx.beginPath(); ctx.arc(p[0], p[1], 1.4, 0, 6.29); ctx.fill(); }
+    }
+
+    // — perspective grid floor —
+    const gt = reduced ? 0 : (t * 0.00009) % 1;
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 15; i++) {                            // horizontals rolling toward viewer
+      const z = (i + gt) / 15;
+      const gy = hy + (h - hy) * Math.pow(z, 3);
+      ctx.strokeStyle = `rgba(201,242,78,${0.05 + z * 0.30})`;
+      ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke();
+    }
+    for (let i = -14; i <= 14; i++) {                          // verticals to the vanishing point
+      ctx.strokeStyle = "rgba(201,242,78,0.14)";
+      ctx.beginPath(); ctx.moveTo(cx + i * w * 0.011, hy);
+      ctx.lineTo(cx + i * w * 0.16, h + 40); ctx.stroke();
+    }
+    // horizon line + glow
+    const hg = ctx.createLinearGradient(0, hy - 26, 0, hy + 26);
+    hg.addColorStop(0, "rgba(201,242,78,0)"); hg.addColorStop(0.5, "rgba(201,242,78,0.20)"); hg.addColorStop(1, "rgba(201,242,78,0)");
+    ctx.fillStyle = hg; ctx.fillRect(0, hy - 26, w, 52);
+    ctx.strokeStyle = "rgba(234,255,158,0.85)"; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(0, hy); ctx.lineTo(w, hy); ctx.stroke();
+  }
+
+  /* ── dock magnification (macOS-style neighbor falloff) ────────── */
+  function initDockMag() {
+    if (reduced || !matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    const dock = root.querySelector("#osDock");
+    const items = () => [...dock.querySelectorAll(".os-dockitem")];
+    dock.addEventListener("mouseenter", () => dock.classList.add("is-mag"));
+    dock.addEventListener("mousemove", (e) => {
+      for (const it of items()) {
+        const r = it.getBoundingClientRect();
+        const d = Math.abs(e.clientX - (r.left + r.width / 2));
+        const f = Math.max(0, 1 - d / 130) ** 2;
+        it.style.transform = `translateY(${-16 * f}px) scale(${1 + 0.55 * f})`;
+        it.style.marginInline = `${6 * f}px`;
+      }
+    });
+    dock.addEventListener("mouseleave", () => {
+      dock.classList.remove("is-mag");
+      for (const it of items()) { it.style.transform = ""; it.style.marginInline = ""; }
+    });
+  }
+
   /* ── Krypt Craft — isometric voxel sandbox ───────────────────── */
   const CRAFT_BLOCKS = [
     { n: "Grass", t: "#8fd35a", l: "#6b4a2e", r: "#573c25" },
@@ -876,6 +1071,7 @@ phone:    <span class="c">${DATA.phone}</span>`,
     build();
     document.documentElement.classList.add("os-active");
     requestAnimationFrame(() => root.classList.add("is-on"));
+    startWall();
     if (firstBoot) { firstBoot = false; setTimeout(runBoot, 100); }
     try { history.replaceState(null, "", "#os"); } catch (_) {}
     const btn = document.getElementById("osToggle");
@@ -885,6 +1081,7 @@ phone:    <span class="c">${DATA.phone}</span>`,
     if (!root) return;
     root.classList.remove("is-on");
     document.documentElement.classList.remove("os-active");
+    stopWall();
     try { history.replaceState(null, "", window.location.pathname + window.location.search); } catch (_) {}
     const btn = document.getElementById("osToggle");
     if (btn) btn.setAttribute("aria-pressed", "false");
