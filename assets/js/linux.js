@@ -53,6 +53,10 @@
     battery: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="8" width="17" height="8" rx="2"/><path d="M22 11v2"/><rect x="4" y="10" width="11" height="4" rx="1" fill="#c9f24e" stroke="none"/></svg>',
     vol: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9.5h3L11 6v12l-4-3.5H4v-5Z"/><path d="M15 9a4 4 0 0 1 0 6"/></svg>',
     power: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v9M6.5 7a8 8 0 1 0 11 0"/></svg>',
+    cube: '<svg viewBox="0 0 24 24" fill="none" stroke="#c9f24e" stroke-width="1.5"><path d="M12 2 3 7v10l9 5 9-5V7l-9-5Z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg>',
+    eraser: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 15 6.5-6.5a2 2 0 0 1 2.8 0l4.2 4.2a2 2 0 0 1 0 2.8L14 20H8l-4-4Z"/><path d="M9 20h11"/></svg>',
+    dice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="16" cy="16" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>',
   };
 
   let root = null, zTop = 30, built = false;
@@ -107,7 +111,7 @@
 
         <div class="os-toast" id="osToast">
           <h5>Welcome to <b>Abubakar Linux</b></h5>
-          <p>A portfolio that boots like an OS. Double-click a desktop icon or tap the dock. Try the <b>Terminal</b> — type <b>help</b>.</p>
+          <p>A portfolio that boots like an OS. Try the <b>Terminal</b> (type <b>help</b>) or build a world in <b>Krypt Craft</b> 🧊 — a voxel sandbox in the dock.</p>
         </div>
       </div>`;
   }
@@ -119,6 +123,7 @@
     { id: "terminal", label: "Terminal",  icon: I.terminal,file: "bash" },
     { id: "skills",   label: "Skills",    icon: I.skills,  file: "skills.md" },
     { id: "contact",  label: "Contact",   icon: I.mail,    file: "contact.vcf" },
+    { id: "craft",    label: "Krypt Craft", icon: I.cube,  file: "craft.vox" },
     { id: "browser",  label: "Browser",   icon: I.browser, file: "github" },
   ];
 
@@ -311,6 +316,7 @@
     const sizes = {
       about:    [640, 440], projects: [720, 520], files: [640, 420],
       terminal: [620, 420], skills:   [640, 460], contact: [520, 380], browser: [720, 500],
+      craft:    [800, 580],
     };
     let [w, h] = sizes[id] || [560, 400];
     w = Math.min(w, vw - 40); h = Math.min(h, vh - 90);
@@ -389,6 +395,7 @@
       case "terminal": return `<div class="os-term" id="osTermBody"></div>`;
       case "skills": return skillsHTML();
       case "contact": return contactHTML();
+      case "craft": return craftHTML();
       case "browser": return browserHTML();
       default: return "";
     }
@@ -522,6 +529,7 @@
       window.location.href = "mailto:" + DATA.email;
     });
     if (id === "terminal") initTerminal(w.querySelector("#osTermBody"));
+    if (id === "craft") initCraft(w);
   }
 
   /* ── interactive terminal ─────────────────────────────────────── */
@@ -652,6 +660,214 @@ phone:    <span class="c">${DATA.phone}</span>`,
 <b>Memory</b>:  6+ security builds cached
 <b>Host</b>:    GIKI · Lahore, PK`;
     return `<div class="os-neofetch"><pre>${art}</pre><div class="os-neofetch__info">${info}</div></div>`;
+  }
+
+  /* ── Krypt Craft — isometric voxel sandbox ───────────────────── */
+  const CRAFT_BLOCKS = [
+    { n: "Grass", t: "#8fd35a", l: "#6b4a2e", r: "#573c25" },
+    { n: "Dirt",  t: "#a06a45", l: "#7d5236", r: "#653f28" },
+    { n: "Stone", t: "#aab0b8", l: "#878d95", r: "#6a6f77" },
+    { n: "Acid",  t: "#e6ff86", l: "#c9f24e", r: "#9dc033", glow: true },
+    { n: "Gold",  t: "#ffe291", l: "#f2c14e", r: "#c69a34" },
+    { n: "Water", t: "#8ac6ff", l: "#4ea3f2", r: "#3b7fc4", alpha: 0.82 },
+    { n: "Lava",  t: "#ffa262", l: "#f2683b", r: "#c04a26", glow: true },
+    { n: "Snow",  t: "#ffffff", l: "#e2e8f0", r: "#c3ccd8" },
+    { n: "Wood",  t: "#caa06a", l: "#b5793f", r: "#8d5c30" },
+  ];
+
+  function craftHTML() {
+    const slots = CRAFT_BLOCKS.map((b, i) => `
+      <button class="os-craft__slot${i === 0 ? " is-on" : ""}" data-slot="${i}" data-k="${i + 1}" data-n="${b.n}"
+        style="background:linear-gradient(150deg, ${b.t} 0 40%, ${b.l} 40% 72%, ${b.r} 72% 100%)" aria-label="${b.n}"></button>`).join("");
+    return `<div class="os-craft">
+      <canvas class="os-craft__canvas"></canvas>
+      <div class="os-craft__hud" id="osCraftHud"></div>
+      <div class="os-craft__help">click · place<br>right-click · remove<br>1–9 · pick block · drag to paint</div>
+      <div class="os-craft__bar">
+        <div class="os-craft__slots">${slots}</div>
+        <div class="os-craft__tools">
+          <button class="os-craft__btn" data-tool="erase">${I.eraser} Erase</button>
+          <button class="os-craft__btn" data-tool="random">${I.dice} World</button>
+          <button class="os-craft__btn" data-tool="clear">${I.trash} Clear</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function initCraft(w) {
+    const wrap = w.querySelector(".os-craft");
+    const canvas = w.querySelector(".os-craft__canvas");
+    const ctx = canvas.getContext("2d");
+    const hud = w.querySelector("#osCraftHud");
+    const W = 34, HW = W / 2, QH = W / 4, VH = 20, B = 7;
+    const vox = new Map();
+    const key = (x, y, z) => x + "," + y + "," + z;
+    let sel = 0, erase = false, hover = null, origin = { x: 0, y: 0 }, css = { w: 0, h: 0 };
+    let paint = false, paintErase = false;
+
+    const proj = (x, y, z) => ({ sx: origin.x + (x - y) * HW, sy: origin.y + (x + y) * QH - z * VH });
+    const shade = (hex, f) => {
+      const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+      const m = (c) => Math.max(0, Math.min(255, Math.round(c + 255 * f)));
+      return `rgb(${m(r)},${m(g)},${m(b)})`;
+    };
+
+    function resize() {
+      const r = canvas.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      css = { w: r.width, h: r.height };
+      canvas.width = Math.round(r.width * dpr);
+      canvas.height = Math.round(r.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      origin.x = r.width / 2;
+      origin.y = r.height * 0.32;
+      draw();
+    }
+
+    function cube(x, y, z, b, ghost) {
+      const { sx, sy } = proj(x, y, z);
+      if (ghost) {
+        ctx.save(); ctx.globalAlpha = 0.9; ctx.strokeStyle = erase ? "#ff6b6b" : "#c9f24e";
+        ctx.lineWidth = 1.6; ctx.setLineDash([4, 3]);
+        ctx.beginPath(); ctx.moveTo(sx, sy - QH); ctx.lineTo(sx + HW, sy); ctx.lineTo(sx, sy + QH); ctx.lineTo(sx - HW, sy); ctx.closePath(); ctx.stroke();
+        ctx.restore(); return;
+      }
+      ctx.globalAlpha = b.alpha || 1;
+      if (b.glow) { ctx.save(); ctx.shadowColor = b.l; ctx.shadowBlur = 14; }
+      // left
+      ctx.fillStyle = b.l;
+      ctx.beginPath(); ctx.moveTo(sx - HW, sy); ctx.lineTo(sx, sy + QH); ctx.lineTo(sx, sy + QH + VH); ctx.lineTo(sx - HW, sy + VH); ctx.closePath(); ctx.fill();
+      // right
+      ctx.fillStyle = b.r;
+      ctx.beginPath(); ctx.moveTo(sx + HW, sy); ctx.lineTo(sx, sy + QH); ctx.lineTo(sx, sy + QH + VH); ctx.lineTo(sx + HW, sy + VH); ctx.closePath(); ctx.fill();
+      // top
+      ctx.fillStyle = b.t;
+      ctx.beginPath(); ctx.moveTo(sx, sy - QH); ctx.lineTo(sx + HW, sy); ctx.lineTo(sx, sy + QH); ctx.lineTo(sx - HW, sy); ctx.closePath(); ctx.fill();
+      if (b.glow) ctx.restore();
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = "rgba(0,0,0,0.22)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sx, sy - QH); ctx.lineTo(sx + HW, sy); ctx.lineTo(sx, sy + QH); ctx.lineTo(sx - HW, sy); ctx.closePath(); ctx.stroke();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, css.w, css.h);
+      // ground guide
+      ctx.strokeStyle = "rgba(201,242,78,0.10)"; ctx.lineWidth = 1;
+      for (let x = -B; x <= B; x++) for (let y = -B; y <= B; y++) {
+        if (vox.has(key(x, y, 0))) continue;
+        const { sx, sy } = proj(x, y, 0);
+        ctx.beginPath(); ctx.moveTo(sx, sy - QH); ctx.lineTo(sx + HW, sy); ctx.lineTo(sx, sy + QH); ctx.lineTo(sx - HW, sy); ctx.closePath(); ctx.stroke();
+      }
+      // voxels back-to-front
+      const list = voxList().sort((a, b2) => (a.x + a.y - (b2.x + b2.y)) || (a.z - b2.z));
+      list.forEach((v) => cube(v.x, v.y, v.z, CRAFT_BLOCKS[v.b]));
+      // hover ghost
+      if (hover) cube(hover.x, hover.y, hover.z, null, true);
+    }
+
+    const voxList = () => [...vox.entries()].map(([k, b]) => { const [x, y, z] = k.split(",").map(Number); return { x, y, z, b }; });
+    const inTop = (x, y, z, mx, my) => { const { sx, sy } = proj(x, y, z); return Math.abs(mx - sx) / HW + Math.abs(my - sy) / QH <= 1; };
+    function inPoly(px, py, p) { let s = 0; for (let i = 0; i < p.length; i++) { const a = p[i], b = p[(i + 1) % p.length]; const c = (b[0] - a[0]) * (py - a[1]) - (b[1] - a[1]) * (px - a[0]); if (c !== 0) { const sg = c > 0 ? 1 : -1; if (!s) s = sg; else if (sg !== s) return false; } } return true; }
+    function inCube(x, y, z, mx, my) {
+      const { sx, sy } = proj(x, y, z);
+      const top = [[sx, sy - QH], [sx + HW, sy], [sx, sy + QH], [sx - HW, sy]];
+      const lf = [[sx - HW, sy], [sx, sy + QH], [sx, sy + QH + VH], [sx - HW, sy + VH]];
+      const rf = [[sx + HW, sy], [sx, sy + QH], [sx, sy + QH + VH], [sx + HW, sy + VH]];
+      return inPoly(mx, my, top) || inPoly(mx, my, lf) || inPoly(mx, my, rf);
+    }
+    const front = () => voxList().sort((a, b) => (b.x + b.y - (a.x + a.y)) || (b.z - a.z));
+
+    function pickPlace(mx, my) {
+      for (const v of front()) if (inTop(v.x, v.y, v.z, mx, my)) return { x: v.x, y: v.y, z: v.z + 1 };
+      const rx = mx - origin.x, ry = my - origin.y, a = rx / HW, b = ry / QH;
+      const gx = Math.round((a + b) / 2), gy = Math.round((b - a) / 2);
+      if (Math.abs(gx) <= B && Math.abs(gy) <= B && !vox.has(key(gx, gy, 0))) return { x: gx, y: gy, z: 0 };
+      return null;
+    }
+    function pickErase(mx, my) { for (const v of front()) if (inCube(v.x, v.y, v.z, mx, my)) return { x: v.x, y: v.y, z: v.z }; return null; }
+    const mpos = (e) => { const r = canvas.getBoundingClientRect(); return { mx: e.clientX - r.left, my: e.clientY - r.top }; };
+
+    function apply(e, rm) {
+      const { mx, my } = mpos(e);
+      if (rm) { const t = pickErase(mx, my); if (t) { vox.delete(key(t.x, t.y, t.z)); } }
+      else { const t = pickPlace(mx, my); if (t) vox.set(key(t.x, t.y, t.z), sel); }
+      updateHover(e); draw(); setHud();
+    }
+    function updateHover(e) {
+      const { mx, my } = mpos(e);
+      hover = erase ? pickErase(mx, my) : pickPlace(mx, my);
+    }
+    function setHud() {
+      const b = CRAFT_BLOCKS[sel];
+      hud.innerHTML = `Abubakar Linux · <b>Krypt Craft</b><br>block: <b>${erase ? "ERASE" : b.n}</b> &nbsp; voxels: <b>${vox.size}</b>`;
+    }
+
+    canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+    canvas.addEventListener("pointerdown", (e) => {
+      canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId);
+      paint = true; paintErase = e.button === 2 || erase; apply(e, paintErase); e.preventDefault();
+    });
+    canvas.addEventListener("pointermove", (e) => {
+      if (paint) apply(e, paintErase);
+      else { const before = hover && key(hover.x, hover.y, hover.z); updateHover(e); if ((hover && key(hover.x, hover.y, hover.z)) !== before) draw(); }
+    });
+    const end = () => { paint = false; };
+    canvas.addEventListener("pointerup", end);
+    canvas.addEventListener("pointercancel", end);
+    canvas.addEventListener("pointerleave", () => { if (!paint && hover) { hover = null; draw(); } });
+
+    // hotbar
+    w.querySelectorAll(".os-craft__slot").forEach((s) => s.addEventListener("click", () => {
+      sel = +s.dataset.slot; erase = false;
+      w.querySelectorAll(".os-craft__slot").forEach((o) => o.classList.remove("is-on"));
+      s.classList.add("is-on");
+      w.querySelector('[data-tool="erase"]').classList.remove("is-on");
+      setHud();
+    }));
+    // tools
+    const eBtn = w.querySelector('[data-tool="erase"]');
+    eBtn.addEventListener("click", () => { erase = !erase; eBtn.classList.toggle("is-on", erase); setHud(); });
+    w.querySelector('[data-tool="random"]').addEventListener("click", () => { seed(); draw(); setHud(); });
+    w.querySelector('[data-tool="clear"]').addEventListener("click", () => { vox.clear(); draw(); setHud(); });
+
+    // keyboard 1-9 / e / r / c while this window is focused
+    const onKey = (e) => {
+      if (!document.body.contains(w) || !w.classList.contains("is-active")) return;
+      if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+      if (e.key >= "1" && e.key <= "9") { const i = +e.key - 1; if (i < CRAFT_BLOCKS.length) { w.querySelectorAll(".os-craft__slot")[i].click(); } }
+      else if (e.key.toLowerCase() === "e") eBtn.click();
+      else if (e.key.toLowerCase() === "r") { seed(); draw(); setHud(); }
+    };
+    document.addEventListener("keydown", onKey);
+
+    function seed() {
+      vox.clear();
+      const ox = (Math.random() * 6) | 0, oy = (Math.random() * 6) | 0;
+      for (let x = -B + 1; x <= B - 1; x++) for (let y = -B + 1; y <= B - 1; y++) {
+        const d = Math.hypot(x, y);
+        let h = Math.round(2.6 - d * 0.44 + Math.sin((x + ox) * 0.9) * 0.5 + Math.cos((y + oy) * 0.8) * 0.5);
+        h = Math.max(0, Math.min(3, h));
+        for (let z = 0; z <= h; z++) {
+          let b = z === h ? (h >= 3 ? 7 : 0) : 1; // snow peak / grass top / dirt below
+          if (h === 0 && d > B - 2.2) b = 5; // water ring at the low edge
+          vox.set(key(x, y, z), b);
+        }
+      }
+      // a couple of neon acid crystals
+      for (let i = 0; i < 3; i++) {
+        const x = ((Math.random() * (2 * B - 4)) | 0) - (B - 2), y = ((Math.random() * (2 * B - 4)) | 0) - (B - 2);
+        let top = 0; while (vox.has(key(x, y, top))) top++;
+        if (top > 0) { vox.set(key(x, y, top), 3); if (Math.random() > 0.5) vox.set(key(x, y, top + 1), 3); }
+      }
+    }
+
+    const ro = new ResizeObserver(() => resize());
+    ro.observe(wrap);
+    seed();
+    requestAnimationFrame(resize);
+    setTimeout(resize, 60);
+    setHud();
   }
 
   /* ── enter / exit ─────────────────────────────────────────────── */
