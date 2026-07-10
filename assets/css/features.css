@@ -297,3 +297,38 @@ html.vault-breached .vault-hint { color: var(--accent); border-color: rgba(201,2
 html.vault-breached .vault-hint__lock { filter: none; }
 html.vault-breached .vault-hint__txt--locked { display: none; }
 html.vault-breached .vault-hint__txt--done { display: inline; }
+
+/* ══ FEATURE DOCK (always-visible launcher) ═══════════════════════ */
+.dock {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: max(0.9rem, env(safe-area-inset-bottom)); z-index: 8200;
+  display: flex; gap: 0.15rem; padding: 0.4rem;
+  border-radius: 18px; border: 1px solid var(--line);
+  background: rgba(12,13,17,0.72); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  box-shadow: 0 14px 44px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,242,78,0.04) inset;
+  transition: opacity .4s var(--ease), transform .4s var(--ease);
+  max-width: calc(100vw - 1.4rem);
+}
+.dock.is-hidden { opacity: 0; transform: translateX(-50%) translateY(24px); pointer-events: none; }
+.dock__btn {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  width: 62px; padding: 0.5rem 0.2rem; border: none; background: none;
+  color: var(--muted); border-radius: 12px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: color .25s var(--ease), background .25s var(--ease);
+}
+.dock__btn:hover, .dock__btn:focus-visible { color: var(--fg); background: rgba(242,239,230,0.06); outline: none; }
+.dock__btn.is-active { color: var(--accent); }
+.dock__btn.is-active .dock__ic { filter: drop-shadow(0 0 6px rgba(201,242,78,0.55)); }
+.dock__ic { width: 21px; height: 21px; }
+.dock__lbl { font-family: var(--font-mono); font-size: 0.52rem; letter-spacing: 0.06em; text-transform: uppercase; }
+
+@media (max-width: 480px) {
+  .dock { gap: 0; padding: 0.35rem 0.25rem; border-radius: 16px; }
+  .dock__btn { width: 60px; padding: 0.45rem 0.1rem; }
+  .dock__ic { width: 20px; height: 20px; }
+  .dock__lbl { font-size: 0.5rem; }
+}
+@media (max-width: 360px) {
+  .dock__btn { width: 54px; }
+  .dock__lbl { font-size: 0.46rem; }
+}
