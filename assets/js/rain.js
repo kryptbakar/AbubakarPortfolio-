@@ -74,11 +74,11 @@
   const rnd  = (a, b) => a + Math.random() * (b - a);
   const clmp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-  let MAX_DROPS = 320;
+  let MAX_DROPS = 180;
   function computeCaps() {
-    MAX_DROPS = Math.round((W * H) / 6000);
-    if (coarse) MAX_DROPS = Math.round(MAX_DROPS * 0.55);
-    MAX_DROPS = clmp(MAX_DROPS, 110, 640);
+    MAX_DROPS = Math.round((W * H) / 12500);   // fewer, livelier streaks
+    if (coarse) MAX_DROPS = Math.round(MAX_DROPS * 0.6);
+    MAX_DROPS = clmp(MAX_DROPS, 55, 300);
   }
 
   /* ── clouds: dark masses that descend into view as they gather ── */
@@ -111,8 +111,10 @@
       x: rnd(-0.12, 1.12) * W,
       y: fromTop ? rnd(-H * 0.6, -20) : rnd(-40, H),
       depth, b: Math.min(NB - 1, (depth * NB) | 0),
-      len: rnd(9, 18) + depth * 30,
-      speed: rnd(820, 1040) + depth * 1050,
+      len: rnd(12, 22) + depth * 36,
+      speed: rnd(760, 1000) + depth * 1150,
+      ph: rnd(0, 6.28),                 // flutter phase — each drop sways on its own
+      sway: rnd(10, 26),
     };
   }
 
@@ -132,7 +134,7 @@
   const glass = [];
   const GMAX = coarse ? 14 : 26;
   function spawnGlassStatic() {
-    return { x: rnd(0, W), y: rnd(0, H * 0.9), r: rnd(2.5, 7), vy: 0,
+    return { x: rnd(0, W), y: rnd(0, H * 0.9), r: rnd(3.5, 9), vy: 0,
       state: "cling", hold: rnd(0.4, 3.5), wob: rnd(0, 6.28), trail: 0 };
   }
 
@@ -279,18 +281,7 @@
     const out = actx.createGain(); out.gain.value = vol;
     out.connect(masterMix); out.connect(reverbBus);
 
-    if (distance < 0.5) {                      // sharp initial crack
-      const cd = 0.22, cs = actx.createBufferSource(); cs.buffer = noiseBuffer(cd);
-      const hp = actx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 850;
-      const bp = actx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = rnd(1400, 2200); bp.Q.value = 0.7;
-      const cg = actx.createGain();
-      cg.gain.setValueAtTime(0.0001, t);
-      cg.gain.exponentialRampToValueAtTime((1 - distance) * 1.1, t + 0.006);
-      cg.gain.exponentialRampToValueAtTime(0.0001, t + cd);
-      cs.connect(hp); hp.connect(bp); bp.connect(cg); cg.connect(out);
-      cs.start(t); cs.stop(t + cd);
-    }
-
+    // (no sharp crack — just the deep rolling rumble the storm rides on)
     for (let k = 0; k < 3; k++) {               // 3 overlapping rolling beds
       const off = k * rnd(0.15, 0.7), bd = Math.max(0.8, dur - off);
       const ns = actx.createBufferSource(); ns.buffer = noiseBuffer(bd);
@@ -352,7 +343,8 @@
     rain  += (targetRain  - rain)  * (enabled ? 1.1 : 2.4) * dt;
     cloud = clmp(cloud, 0, 1); rain = clmp(rain, 0, 1);
 
-    wind = (Math.sin(T * 0.08) * 90 + Math.sin(T * 0.031 + 2) * 70) * (1 + squall * 1.3) + squall * 150 * gustSign;
+    // gustier, more visible wind — bigger swings plus a faster shimmer
+    wind = (Math.sin(T * 0.12) * 135 + Math.sin(T * 0.045 + 2) * 105 + Math.sin(T * 0.55) * 34) * (1 + squall * 1.4) + squall * 210 * gustSign;
 
     if (enabled && !reduced) {
       if (nextStrike === Infinity && elapsed > STORM_LEAD) scheduleStrike(now, stormWave);
@@ -431,7 +423,9 @@
       const groundY = H * 0.985;
       for (let i = 0; i < drops.length; i++) {
         const d = drops[i];
-        const vx = wind * (0.35 + d.depth * 0.95);
+        // wind + a gentle per-drop flutter so each streak wavers on its own
+        const flutter = Math.sin(T * 3 + d.ph + d.y * 0.012) * d.sway * d.depth;
+        const vx = wind * (0.35 + d.depth * 0.95) + flutter;
         d.x += vx * dt; d.y += d.speed * dt;
         const dxn = (vx / d.speed) * d.len;
         const s = seg[d.b]; s.push(d.x, d.y, d.x - dxn, d.y - d.len);
@@ -555,18 +549,53 @@
 
   function drawGlassDrop(gd) {
     const r = gd.r;
-    // soft body
-    const g = ctx.createRadialGradient(gd.x - r * 0.3, gd.y - r * 0.3, r * 0.1, gd.x, gd.y, r);
-    g.addColorStop(0, `rgba(226,238,255,${0.16 + flash * 0.35})`);
-    g.addColorStop(0.6, "rgba(180,200,230,0.05)");
-    g.addColorStop(1, "rgba(120,140,175,0.12)");
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(gd.x, gd.y, r, 0, Math.PI * 2); ctx.fill();
-    // dark refractive rim
-    ctx.strokeStyle = "rgba(20,26,38,0.25)"; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(gd.x, gd.y, r, 0, Math.PI * 2); ctx.stroke();
-    // specular highlight that glints on lightning
-    ctx.fillStyle = `rgba(255,255,255,${0.5 + flash * 0.5})`;
-    ctx.beginPath(); ctx.arc(gd.x - r * 0.32, gd.y - r * 0.32, Math.max(0.6, r * 0.18), 0, Math.PI * 2); ctx.fill();
+    const running = gd.state === "run";
+    const stretch = running ? clmp(1 + gd.vy / 340, 1, 1.7) : 1;   // teardrop when sliding
+    const gl = 0.28 + flash * 0.5;                                  // extra glint on lightning
+
+    // wet streak trailing above a sliding drop
+    if (running) {
+      const tl = 20 + gd.vy * 0.06;
+      const tg = ctx.createLinearGradient(gd.x, gd.y - r, gd.x, gd.y - r - tl);
+      tg.addColorStop(0, `rgba(198,216,246,${0.10 + flash * 0.14})`);
+      tg.addColorStop(1, "rgba(198,216,246,0)");
+      ctx.fillStyle = tg;
+      ctx.fillRect(gd.x - r * 0.42, gd.y - r - tl, r * 0.84, tl);
+    }
+
+    ctx.save();
+    ctx.translate(gd.x, gd.y);
+    ctx.scale(1, stretch);
+
+    // 1) lens body — near-transparent centre (page shows through), darker rim
+    const body = ctx.createRadialGradient(-r * 0.28, -r * 0.34, r * 0.05, 0, 0, r);
+    body.addColorStop(0,    "rgba(228,240,255,0.05)");
+    body.addColorStop(0.62, "rgba(175,195,225,0.05)");
+    body.addColorStop(0.86, "rgba(120,140,175,0.13)");
+    body.addColorStop(1,    "rgba(70,88,120,0.24)");      // refractive edge
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+
+    // 2) bright crescent low in the drop — light focused through the lens
+    const foc = ctx.createRadialGradient(0, r * 0.34, 0, 0, r * 0.34, r * 0.9);
+    foc.addColorStop(0, `rgba(244,250,255,${gl})`);
+    foc.addColorStop(0.7, `rgba(210,228,250,${gl * 0.35})`);
+    foc.addColorStop(1, "rgba(210,228,250,0)");
+    ctx.fillStyle = foc;
+    ctx.beginPath(); ctx.arc(0, r * 0.18, r * 0.9, 0, Math.PI * 2); ctx.fill();
+
+    // 3) thin dark rim up top for that meniscus edge
+    ctx.lineWidth = Math.max(0.6, r * 0.12);
+    ctx.strokeStyle = "rgba(16,22,34,0.28)";
+    ctx.beginPath(); ctx.arc(0, 0, r * 0.96, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+
+    ctx.restore();
+
+    // 4) crisp specular highlight (drawn unscaled so it stays a sharp glare)
+    ctx.fillStyle = `rgba(255,255,255,${0.7 + flash * 0.3})`;
+    ctx.beginPath();
+    ctx.ellipse(gd.x - r * 0.34, gd.y - r * 0.42 * stretch, Math.max(0.7, r * 0.2), Math.max(0.5, r * 0.28), -0.5, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   function strokePath(pts) {
