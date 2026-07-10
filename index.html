@@ -144,6 +144,15 @@
       <button class="os-toggle" id="osToggle" type="button" data-cursor="link" aria-pressed="false" aria-label="Boot Abubakar Linux — an OS-themed view of this portfolio" title="Boot Abubakar Linux">
         <span class="os-toggle__dot" aria-hidden="true"></span> Abubakar Linux
       </button>
+      <button class="weather-toggle" id="weatherToggle" type="button" data-cursor="link" aria-pressed="false" aria-label="Toggle rain — gather clouds, thunder and rainfall over the page" title="Toggle rain">
+        <svg class="weather-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7.5 14.5a4 4 0 0 1 .4-7.98 5 5 0 0 1 9.53-1.1A3.6 3.6 0 0 1 17.5 14.5z"/>
+          <line class="drop" x1="8"  y1="17" x2="7"  y2="20"/>
+          <line class="drop" x1="12" y1="17" x2="11" y2="20"/>
+          <line class="drop" x1="16" y1="17" x2="15" y2="20"/>
+        </svg>
+        <span class="weather-toggle__off">Rain</span><span class="weather-toggle__on">Clear</span>
+      </button>
       <button class="nav__cmdk" type="button" data-cursor="link" aria-label="Open command menu">⌘K</button>
       <a class="nav__cv" href="assets/Muhammad-Abubakar-CV.pdf" download data-cursor="link">CV ↓</a>
       <span class="nav__status"><i></i> Available · 2027</span>
@@ -792,6 +801,7 @@ Date:   2025 — 2026 · GIKI · Physical-Layer Security</div>
     }, 2300);
   })();
   </script>
+  <script src="assets/js/rain.js"></script>
   <script src="assets/js/linux.js"></script>
 </body>
 </html>
