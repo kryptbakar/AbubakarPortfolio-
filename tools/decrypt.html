@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Decrypt · Abubakar</title>
+<style>
+  :root { --bg:#0a0a0c; --fg:#f2efe6; --muted:rgba(242,239,230,.55); --line:rgba(242,239,230,.14); --accent:#c9f24e; --mono:'JetBrains Mono',ui-monospace,monospace; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--bg); color:var(--fg); font-family:var(--mono); line-height:1.5; padding:clamp(1rem,4vw,2.5rem); max-width:820px; margin:0 auto; }
+  h1 { font-size:1.4rem; letter-spacing:-.01em; margin-bottom:.3rem; }
+  h1 b { color:var(--accent); }
+  p.sub { color:var(--muted); font-size:.8rem; margin-bottom:1.6rem; }
+  label { display:block; font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:1.2rem 0 .45rem; }
+  textarea { width:100%; background:#07080b; color:#7cf2c8; border:1px solid var(--line); border-radius:8px; padding:.7rem .8rem; font-family:var(--mono); font-size:.72rem; resize:vertical; }
+  textarea:focus { outline:none; border-color:var(--accent); }
+  button { margin-top:1.2rem; padding:.8rem 1.3rem; border:none; border-radius:8px; background:var(--accent); color:#0a0a0c; font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; font-weight:600; cursor:pointer; }
+  button:hover { filter:brightness(1.05); }
+  .out { margin-top:1.6rem; border:1px solid var(--line); border-radius:10px; padding:1.1rem; display:none; }
+  .out.show { display:block; }
+  .out.err { border-color:#ff6b6b; }
+  .out h2 { font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin-bottom:.8rem; }
+  .out.err h2 { color:#ff6b6b; }
+  .field { margin-bottom:.7rem; }
+  .field span { color:var(--muted); font-size:.6rem; text-transform:uppercase; letter-spacing:.1em; display:block; }
+  .field div { font-size:.95rem; white-space:pre-wrap; word-break:break-word; margin-top:.15rem; }
+  .note { margin-top:2rem; color:var(--muted); font-size:.66rem; border-top:1px solid var(--line); padding-top:1rem; }
+  .note b { color:var(--fg); }
+</style>
+</head>
+<body>
+  <h1><b>▲</b> Decrypt console</h1>
+  <p class="sub">Reads messages from the portfolio's encrypted contact. 100% offline — your private key never leaves this tab.</p>
+
+  <label for="key">Your private key (PKCS8 · base64)</label>
+  <textarea id="key" rows="4" placeholder="MIIG… (kept only in this tab, in memory)"></textarea>
+
+  <label for="msg">Encrypted message</label>
+  <textarea id="msg" rows="7" placeholder="-----BEGIN ABUBAKAR SECURE MESSAGE-----&#10;…&#10;-----END ABUBAKAR SECURE MESSAGE-----"></textarea>
+
+  <button id="go">Decrypt</button>
+
+  <div class="out" id="out"><h2 id="outTitle">Decrypted</h2><div id="outBody"></div></div>
+
+  <p class="note">Tip: paste your private key once, bookmark this page, and open it whenever a message arrives. It's stored <b>nowhere</b> — refresh clears it. Keep the key secret; anyone with it can read your messages.</p>
+
+<script>
+const fromB64 = (s) => Uint8Array.from(atob(s.replace(/\s+/g,"")), c => c.charCodeAt(0));
+
+async function decrypt() {
+  const out = document.getElementById("out"), title = document.getElementById("outTitle"), body = document.getElementById("outBody");
+  out.className = "out show";
+  const show = (t, html, err) => { out.className = "out show" + (err ? " err" : ""); title.textContent = t; body.innerHTML = html; };
+  try {
+    const pkB64 = document.getElementById("key").value.trim();
+    let armored = document.getElementById("msg").value.trim();
+    if (!pkB64) return show("Error", "Paste your private key first.", true);
+    if (!armored) return show("Error", "Paste an encrypted message.", true);
+
+    armored = armored.replace(/-----(BEGIN|END) ABUBAKAR SECURE MESSAGE-----/g, "").trim();
+    const container = JSON.parse(atob(armored.replace(/\s+/g, "")));
+
+    const priv = await crypto.subtle.importKey("pkcs8", fromB64(pkB64), { name: "RSA-OAEP", hash: "SHA-256" }, false, ["decrypt"]);
+    const rawKey = await crypto.subtle.decrypt({ name: "RSA-OAEP" }, priv, fromB64(container.k));
+    const aesKey = await crypto.subtle.importKey("raw", rawKey, { name: "AES-GCM" }, false, ["decrypt"]);
+    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromB64(container.iv) }, aesKey, fromB64(container.ct));
+    const payload = JSON.parse(new TextDecoder().decode(pt));
+
+    const esc = (s) => String(s == null ? "—" : s).replace(/[&<>]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;" }[c]));
+    show("Decrypted ✓",
+      '<div class="field"><span>From</span><div>' + esc(payload.name) + '</div></div>' +
+      '<div class="field"><span>Reply-to</span><div>' + esc(payload.replyTo) + '</div></div>' +
+      '<div class="field"><span>Sent</span><div>' + esc(payload.sentAt) + '</div></div>' +
+      '<div class="field"><span>Message</span><div>' + esc(payload.message) + '</div></div>');
+  } catch (e) {
+    show("Decryption failed", "Wrong key, or the message is corrupt.<br><small>" + (e && e.message ? e.message : e) + "</small>", true);
+  }
+}
+document.getElementById("go").addEventListener("click", decrypt);
+</script>
+</body>
+</html>

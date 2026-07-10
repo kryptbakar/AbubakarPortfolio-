@@ -58,6 +58,7 @@
 
   <link rel="stylesheet" href="assets/css/style.css" />
   <link rel="stylesheet" href="assets/css/linux.css" />
+  <link rel="stylesheet" href="assets/css/features.css" />
   <noscript><style>
     #loader { display: none !important; }
     [data-fade] { opacity: 1 !important; transform: none !important; }
@@ -93,6 +94,8 @@
 </head>
 <body>
   <a class="skip-link" href="#work">Skip to work</a>
+  <!-- vault · stage 1 seed — if you're reading the source, you're on the right track -->
+  <span id="vault-seed" data-flag="ABK{recon_the_d0m}" hidden aria-hidden="true"></span>
 
   <!-- ░░ SCROLL PROGRESS ░░ -->
   <div class="scroll-progress" id="scrollProgress" aria-hidden="true"><i></i></div>
@@ -158,7 +161,45 @@
       <span class="nav__status"><i></i> Available · 2027</span>
       <span class="nav__clock" id="clock" data-clock>--:--:-- PKT</span>
     </div>
+    <button class="nav__burger" id="navBurger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
   </header>
+
+  <!-- ░░ MOBILE MENU (drawer) ░░ -->
+  <div class="mmenu" id="mobileMenu" aria-hidden="true">
+    <div class="mmenu__backdrop" data-mclose></div>
+    <nav class="mmenu__panel" aria-label="Mobile navigation">
+      <div class="mmenu__head">
+        <span class="mmenu__brand">▲ ABUBAKAR</span>
+        <button class="mmenu__close" type="button" data-mclose aria-label="Close menu">✕</button>
+      </div>
+      <div class="mmenu__group">
+        <span class="mmenu__tag mono">Navigate</span>
+        <a href="#work" data-mgoto>Work</a>
+        <a href="#about" data-mgoto>About</a>
+        <a href="#approach" data-mgoto>Approach</a>
+        <a href="#skills" data-mgoto>Skills</a>
+        <a href="#experience" data-mgoto>Experience</a>
+        <a href="#contact" data-mgoto>Contact</a>
+      </div>
+      <div class="mmenu__group">
+        <span class="mmenu__tag mono">Experience it</span>
+        <button type="button" class="mmenu__act" data-mact="os"><span>Boot Abubakar Linux</span><i>OS</i></button>
+        <button type="button" class="mmenu__act" data-mact="rain"><span>Toggle rain &amp; storm</span><i>WX</i></button>
+        <button type="button" class="mmenu__act" data-mact="recon"><span>Run recon on me</span><i>SCAN</i></button>
+        <button type="button" class="mmenu__act" data-mact="encrypt"><span>Send encrypted message</span><i>PGP</i></button>
+        <button type="button" class="mmenu__act" data-mact="cmdk"><span>Command menu</span><i>⌘K</i></button>
+      </div>
+      <div class="mmenu__group">
+        <span class="mmenu__tag mono">Elsewhere</span>
+        <a href="assets/Muhammad-Abubakar-CV.pdf" download>Download CV ↓</a>
+        <a href="https://github.com/kryptbakar" target="_blank" rel="noopener">GitHub ↗</a>
+        <a href="https://www.linkedin.com/in/muhammad-abubakar-28b4a2312/" target="_blank" rel="noopener">LinkedIn ↗</a>
+      </div>
+      <div class="mmenu__foot mono"><span class="mmenu__status"><i></i> Available · 2027</span><span data-clock>--:--:-- PKT</span></div>
+    </nav>
+  </div>
 
   <!-- ░░ SECTION RAIL ░░ -->
   <aside class="rail" aria-label="Section navigation">
@@ -736,6 +777,9 @@ Date:   2025 — 2026 · GIKI · Physical-Layer Security</div>
           <span>Copy</span>
         </button>
         <a class="contact__copy mono" href="assets/Muhammad-Abubakar-CV.pdf" download data-cursor="link">Download CV ↓</a>
+        <button class="contact__enc mono" id="encryptContactBtn" type="button" data-cursor="link" aria-label="Send an end-to-end encrypted message">
+          <span aria-hidden="true">🔒</span> Send encrypted message
+        </button>
       </div>
 
       <div class="contact__socials">
@@ -802,6 +846,10 @@ Date:   2025 — 2026 · GIKI · Physical-Layer Security</div>
   })();
   </script>
   <script src="assets/js/rain.js"></script>
+  <script src="assets/js/mobilenav.js"></script>
+  <script src="assets/js/recon.js"></script>
+  <script src="assets/js/crypto-contact.js"></script>
+  <script src="assets/js/ctf.js"></script>
   <script src="assets/js/linux.js"></script>
 </body>
 </html>

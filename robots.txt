@@ -2,3 +2,11 @@ User-agent: *
 Allow: /
 
 Sitemap: https://kryptbakar.github.io/Portfolio-/sitemap.xml
+
+# ───────────────────────────────────────────────────────────────
+# Nice — you read the robots file. Most people don't.
+# There's a vault hidden in this site. Open the command palette
+# (press  Cmd/Ctrl + K )  and run:   sudo unlock-vault
+# Or just type the word  "vault"  anywhere on the page.
+# Three stages. Bring your dev tools. — Abubakar
+# ───────────────────────────────────────────────────────────────

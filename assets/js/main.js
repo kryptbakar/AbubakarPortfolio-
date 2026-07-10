@@ -866,7 +866,10 @@
       { label: "Download CV / résumé", hint: "PDF", kw: "resume cv", run: () => { const a = document.createElement("a"); a.href = "assets/Muhammad-Abubakar-CV.pdf"; a.download = ""; document.body.appendChild(a); a.click(); a.remove(); } },
       { label: "Open GitHub", hint: "↗", kw: "code kryptbakar", run: open("https://github.com/kryptbakar") },
       { label: "Open LinkedIn", hint: "↗", kw: "connect", run: open("https://www.linkedin.com/in/muhammad-abubakar-28b4a2312/") },
-      { label: "sudo hire-me", hint: "☺", kw: "job available recruit", run: () => { location.href = "mailto:" + EMAIL + "?subject=Let%27s%20work%20together"; } }
+      { label: "sudo hire-me", hint: "☺", kw: "job available recruit", run: () => { location.href = "mailto:" + EMAIL + "?subject=Let%27s%20work%20together"; } },
+      { label: "Recon Mirror — what your browser leaks", hint: "SCAN", kw: "fingerprint privacy recon tracking phantom", run: () => window.Abubakar && window.Abubakar.openRecon && window.Abubakar.openRecon() },
+      { label: "Send an encrypted message", hint: "PGP", kw: "encrypt secure crypto contact rsa message", run: () => window.Abubakar && window.Abubakar.openEncrypt && window.Abubakar.openEncrypt() },
+      { label: "sudo unlock-vault", hint: "CTF", kw: "vault ctf hack breach flag challenge hidden", run: () => window.Abubakar && window.Abubakar.openVault && window.Abubakar.openVault() }
     );
 
     let filtered = cmds.slice(), sel = 0, isOpen = false;
