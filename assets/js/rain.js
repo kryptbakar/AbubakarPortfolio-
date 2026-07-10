@@ -3,18 +3,18 @@
    A cinematic, living thunderstorm you can toggle from the nav.
 
    When enabled:
-     1. the sky darkens and heavy clouds churn in overhead
-     2. distant sheet-lightning starts to flicker, thunder rolls in the distance
+     1. the sky darkens and heavy clouds slowly gather and descend overhead
+     2. distant sheet-lightning flickers, thunder rolls in from far away
      3. rain fades in and the storm settles into an endless ebb-and-flow of
-        squalls — gusting rain, close forked strikes that light the whole scene,
-        and thunder that cracks then rolls with a real reverb tail
+        squalls — gusting rain, close forked strikes that light the whole scene
+        (and the portrait), droplets running down the "glass", and thunder that
+        cracks then rolls for a long time with a real reverb tail
 
-   Zero dependencies. Pure Canvas 2D for the visuals + WebAudio for synthesized
-   thunder (crack + rolling rumble + sub-bass + convolution reverb, delayed by
-   distance so far strikes rumble seconds after the flash).
-
-   Respects prefers-reduced-motion (no strobing / no thunder), pauses when the
-   tab is hidden, DPR-capped, and lighter on mobile. Acid-green identity.
+   Zero dependencies. Canvas 2D visuals + WebAudio for a looping rain bed and
+   synthesized thunder (crack + long rolling rumble + sub-bass + convolution
+   reverb, delayed by distance). prefers-reduced-motion safe (no strobing / no
+   audio), photosensitivity-limited flashes, tab-hidden aware, DPR-capped,
+   lighter on mobile, and a mute control. Acid-green identity throughout.
    ========================================================================= */
 (() => {
   "use strict";
@@ -22,25 +22,36 @@
   const btn = document.getElementById("weatherToggle");
   if (!btn) return;
 
-  const ACCENT   = "#c9f24e";                 // portfolio acid-green
+  const ACCENT   = "#c9f24e";
   const reduced  = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const coarse   = matchMedia("(pointer: coarse)").matches;
   const STORE_KEY = "abubakar:weather";
-  const VOLUME    = 0.85;                      // master thunder loudness
+  const MUTE_KEY  = "abubakar:weather:mute";
+  const VOLUME    = 0.85;
 
-  /* ── DOM: sky mood layer + drawing canvas ─────────────────────── */
-  const sky = document.createElement("div");
-  sky.className = "rain-sky";
-  sky.setAttribute("aria-hidden", "true");
-
-  const canvas = document.createElement("canvas");
-  canvas.className = "rain-canvas";
-  canvas.setAttribute("aria-hidden", "true");
+  /* ── DOM: sky + color grade + canvas + mute button ────────────── */
+  const sky = el("div", "rain-sky");
+  const grade = el("div", "rain-grade");
+  const canvas = el("canvas", "rain-canvas");
+  const mute = document.createElement("button");
+  mute.className = "weather-mute";
+  mute.type = "button";
+  mute.setAttribute("aria-label", "Mute storm audio");
+  mute.setAttribute("aria-pressed", "false");
+  mute.setAttribute("title", "Mute storm audio");
+  mute.innerHTML =
+    '<svg class="wm-ic wm-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8.5a4 4 0 0 1 0 7"/><path d="M18.5 6a7 7 0 0 1 0 12"/></svg>' +
+    '<svg class="wm-ic wm-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><line x1="16" y1="9" x2="21" y2="15"/><line x1="21" y1="9" x2="16" y2="15"/></svg>';
+  document.body.appendChild(grade);
   document.body.appendChild(sky);
   document.body.appendChild(canvas);
+  document.body.appendChild(mute);
   const ctx = canvas.getContext("2d");
+  const portrait = document.querySelector(".hero__portrait img");
 
-  /* ── sizing (DPR-aware, capped for perf) ──────────────────────── */
+  function el(tag, cls) { const n = document.createElement(tag); n.className = cls; n.setAttribute("aria-hidden", "true"); return n; }
+
+  /* ── sizing (DPR-aware, capped; handles mobile URL-bar resize) ── */
   let W = 0, H = 0, DPR = 1;
   function resize() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -48,17 +59,17 @@
     H = window.innerHeight;
     canvas.width  = Math.round(W * DPR);
     canvas.height = Math.round(H * DPR);
-    canvas.style.width  = W + "px";
+    canvas.style.width = W + "px";
     canvas.style.height = H + "px";
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     buildClouds();
     computeCaps();
   }
 
-  /* ── timing ───────────────────────────────────────────────────── */
-  const STORM_LEAD = 800;    // ms before the first distant flicker
-  const RAIN_DELAY = 1700;   // ms before rain begins
-  const RAIN_RAMP  = 4200;   // ms for the first downpour to build
+  /* ── timing — a slower, more deliberate build ─────────────────── */
+  const STORM_LEAD = 1200;   // ms before the first distant flicker
+  const RAIN_DELAY = 4200;   // ms before rain begins (clouds gather first)
+  const RAIN_RAMP  = 5200;   // ms for the first downpour to build
 
   const rnd  = (a, b) => a + Math.random() * (b - a);
   const clmp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -70,41 +81,42 @@
     MAX_DROPS = clmp(MAX_DROPS, 110, 640);
   }
 
-  /* ── clouds: churning dark band, lit from within by lightning ─── */
+  /* ── clouds: dark masses that descend into view as they gather ── */
   let clouds = [];
   function buildClouds() {
-    const n = Math.max(11, Math.round(W / 120));
+    const n = Math.max(14, Math.round(W / 95));
     clouds = [];
     for (let i = 0; i < n; i++) {
-      const r = rnd(H * 0.16, H * 0.36);
+      const r = rnd(H * 0.15, H * 0.38);
+      const yTo = rnd(-0.14, 0.30) * H;
       clouds.push({
         x: rnd(-0.05, 1.05) * W,
-        y: rnd(-0.12, 0.30) * H,
-        r,
-        drift: rnd(5, 16) * (Math.random() < 0.5 ? -1 : 1),
-        bob: rnd(0, Math.PI * 2),
-        bobAmp: rnd(4, 14),
-        tone: rnd(14, 28),
+        yTo, yFrom: yTo - rnd(40, 120),
+        r, drift: rnd(5, 16) * (Math.random() < 0.5 ? -1 : 1),
+        bob: rnd(0, Math.PI * 2), bobAmp: rnd(4, 14),
+        tone: rnd(20, 40),
       });
     }
   }
 
-  /* ── raindrops (recycled pool, parallax depth) ────────────────── */
+  /* ── raindrops (recycled pool, depth-bucketed for batched drawing) */
+  const NB = 5;
   const drops = [];
+  const seg = Array.from({ length: NB }, () => []);   // reused coord scratch
+  const bAlpha = [0.12, 0.20, 0.30, 0.40, 0.52];
+  const bWidth = [0.6, 0.9, 1.2, 1.6, 2.1];
   function spawnDrop(fromTop) {
     const depth = Math.random();
     return {
       x: rnd(-0.12, 1.12) * W,
       y: fromTop ? rnd(-H * 0.6, -20) : rnd(-40, H),
-      depth,
+      depth, b: Math.min(NB - 1, (depth * NB) | 0),
       len: rnd(9, 18) + depth * 30,
       speed: rnd(820, 1040) + depth * 1050,
-      w: 0.55 + depth * 1.6,
-      a: 0.09 + depth * 0.44,
     };
   }
 
-  /* ── near-camera streaks: a few big, fast, soft foreground drops ─ */
+  /* ── near-camera foreground streaks (depth + drama) ───────────── */
   const fg = [];
   function buildFg() {
     fg.length = 0;
@@ -112,65 +124,57 @@
     for (let i = 0; i < n; i++) fg.push(spawnFg(true));
   }
   function spawnFg(rndY) {
-    return {
-      x: rnd(-0.1, 1.1) * W,
-      y: rndY ? rnd(-H, 0) : rnd(-H * 0.4, -40),
-      len: rnd(60, 150),
-      speed: rnd(2200, 3200),
-      w: rnd(2.2, 4.5),
-      a: rnd(0.05, 0.14),
-    };
+    return { x: rnd(-0.1, 1.1) * W, y: rndY ? rnd(-H, 0) : rnd(-H * 0.4, -40),
+      len: rnd(60, 150), speed: rnd(2200, 3200), w: rnd(2.2, 4.5), a: rnd(0.05, 0.14) };
   }
 
-  /* ── splashes at the waterline ────────────────────────────────── */
+  /* ── rain on the "glass": droplets that cling then run down ────── */
+  const glass = [];
+  const GMAX = coarse ? 14 : 26;
+  function spawnGlassStatic() {
+    return { x: rnd(0, W), y: rnd(0, H * 0.9), r: rnd(2.5, 7), vy: 0,
+      state: "cling", hold: rnd(0.4, 3.5), wob: rnd(0, 6.28), trail: 0 };
+  }
+
+  /* ── splashes across a staggered impact band + puddle line ────── */
   const splashes = [];
   function addSplash(x, y, depth) {
     const big = Math.random() < 0.12;
     splashes.push({ x, y, r: 1, maxR: (big ? rnd(14, 22) : rnd(5, 12)) + depth * 8, a: 0.30 + depth * 0.32 });
     if (depth > 0.6 && splashes.length < 460) {
       const n = big ? 4 : 2;
-      for (let i = 0; i < n; i++) {
-        splashes.push({ x, y, vx: rnd(-55, 55), vy: rnd(-170, -70), bounce: true, r: rnd(0.8, 1.7), a: 0.55 });
-      }
+      for (let i = 0; i < n; i++) splashes.push({ x, y, vx: rnd(-55, 55), vy: rnd(-170, -70), bounce: true, r: rnd(0.8, 1.7), a: 0.55 });
     }
   }
 
-  /* ── lightning ────────────────────────────────────────────────── */
-  let flash = 0;             // 0..1 sky brightness
-  let flashHue = 0;          // 0 = cold white-green, 1 = warm
-  let nextStrike = Infinity;
+  /* ── lightning (with photosensitivity limiter) ────────────────── */
+  let flash = 0, flashHue = 0, nextStrike = Infinity, shake = 0;
   const bolts = [];
-  let shake = 0;             // canvas-only camera shake
+  const flashTimes = [];         // timestamps, to cap flashes/second
+  const MIN_FLASH_GAP = 130;     // ms
+  let lastFlash = -1e9;
 
-  function igniteFlash(peak, warm) {
-    flash = Math.max(flash, peak);
+  function igniteFlash(now, peak, warm) {
+    if (now - lastFlash < MIN_FLASH_GAP) return false;
+    // never more than 3 flashes inside any 1s window
+    while (flashTimes.length && now - flashTimes[0] > 1000) flashTimes.shift();
+    if (flashTimes.length >= 3) return false;
+    flashTimes.push(now); lastFlash = now;
+    flash = Math.max(flash, Math.min(peak, 1));
     flashHue = warm;
-    // quick flicker re-bumps for a real strobe feel
-    const bumps = Math.random() < 0.6 ? Math.round(rnd(1, 3)) : 0;
-    for (let i = 0; i < bumps; i++) {
-      setTimeout(() => { if (enabled) flash = Math.max(flash, peak * rnd(0.4, 0.85)); }, rnd(45, 190));
-    }
+    return true;
   }
 
   function makeBolt(brightness) {
-    const startX = rnd(0.12, 0.88) * W;
-    const startY = rnd(-0.02, 0.12) * H;
-    const endY   = rnd(0.5, 0.9) * H;
+    const startX = rnd(0.12, 0.88) * W, startY = rnd(-0.02, 0.12) * H, endY = rnd(0.5, 0.9) * H;
     const pts = [{ x: startX, y: startY }];
     let x = startX, y = startY;
-    const steps = Math.round(rnd(11, 18));
-    const dy = (endY - startY) / steps;
-    for (let i = 0; i < steps; i++) {
-      x += rnd(-40, 40);
-      y += dy * rnd(0.65, 1.35);
-      pts.push({ x, y });
-    }
+    const steps = Math.round(rnd(11, 18)), dy = (endY - startY) / steps;
+    for (let i = 0; i < steps; i++) { x += rnd(-40, 40); y += dy * rnd(0.65, 1.35); pts.push({ x, y }); }
     const branches = [];
     for (let i = 2; i < pts.length - 1; i++) {
       if (Math.random() < 0.26) {
-        const p = pts[i];
-        const bp = [{ x: p.x, y: p.y }];
-        let bx = p.x, by = p.y;
+        const p = pts[i], bp = [{ x: p.x, y: p.y }]; let bx = p.x, by = p.y;
         const bs = Math.round(rnd(2, 5));
         for (let j = 0; j < bs; j++) { bx += rnd(-46, 46); by += rnd(20, 52); bp.push({ x: bx, y: by }); }
         branches.push(bp);
@@ -179,41 +183,31 @@
     return { pts, branches, life: 1, bright: brightness };
   }
 
-  function scheduleStrike(now, stormWave) {
-    // more frequent while the storm is intense; always some distant activity
-    const gap = rnd(1500, 5200) * (1.55 - stormWave);
-    nextStrike = now + gap;
-  }
+  function scheduleStrike(now, stormWave) { nextStrike = now + rnd(1500, 5200) * (1.55 - stormWave); }
 
   function strike(now, stormWave) {
     if (reduced) return;
-    // distance 0 = right overhead, 1 = far away. Bias toward distant, with the
-    // occasional close, scene-lighting strike (the "shock" moments).
     let distance = Math.pow(Math.random(), 0.6);
     if (Math.random() < 0.16 + stormWave * 0.12) distance = rnd(0, 0.28);
-
     const close = distance < 0.5;
-    const peak  = clmp((1 - distance) * rnd(0.7, 1) + 0.14, 0.14, 1);
-    igniteFlash(peak, distance > 0.55 ? 0.4 : 0);
-
-    if (close && bolts.length < 5) {
-      const b = makeBolt(1 - distance * 0.7);
-      bolts.push(b);
-      // a forked companion for the very close ones
-      if (distance < 0.22 && Math.random() < 0.6) bolts.push(makeBolt(1 - distance));
+    const peak = clmp((1 - distance) * rnd(0.7, 1) + 0.14, 0.14, 1);
+    const lit = igniteFlash(now, peak, distance > 0.55 ? 0.4 : 0);
+    if (lit) {
+      if (close && bolts.length < 5) {
+        bolts.push(makeBolt(1 - distance * 0.7));
+        if (distance < 0.22 && Math.random() < 0.6) bolts.push(makeBolt(1 - distance));
+      }
+      if (distance < 0.2) shake = Math.max(shake, (1 - distance) * 8);
     }
-    if (distance < 0.2) shake = Math.max(shake, (1 - distance) * 8);
-
     thunder(distance, rnd(0.85, 1.15));
-
-    // clustered aftershocks — storms rarely flash just once
     if (Math.random() < 0.35) {
       const extra = Math.round(rnd(1, 2));
       for (let i = 0; i < extra; i++) {
         setTimeout(() => {
           if (!enabled) return;
-          igniteFlash(peak * rnd(0.5, 0.85), distance > 0.5 ? 0.4 : 0);
-          if (close && bolts.length < 5 && Math.random() < 0.5) bolts.push(makeBolt(1 - distance * 0.8));
+          const t2 = performance.now();
+          const lit2 = igniteFlash(t2, peak * rnd(0.5, 0.85), distance > 0.5 ? 0.4 : 0);
+          if (lit2 && close && bolts.length < 5 && Math.random() < 0.5) bolts.push(makeBolt(1 - distance * 0.8));
           thunder(clmp(distance + rnd(-0.05, 0.12), 0, 1), rnd(0.5, 0.85));
         }, rnd(220, 900) * (i + 1));
       }
@@ -221,62 +215,72 @@
     scheduleStrike(now, stormWave);
   }
 
-  /* ── audio: realistic synthesized thunder ─────────────────────── */
-  let actx = null, busComp = null, reverbBus = null, IR = null;
+  /* ── audio: rain bed + long, rolling, reverberant thunder ─────── */
+  let actx = null, busComp = null, masterMix = null, reverbBus = null, IR = null;
+  let rainSrc = null, rainGain = null, rainFilter = null, rainStopT = 0;
+  let muted = false;
+  try { muted = localStorage.getItem(MUTE_KEY) === "1"; } catch (_) {}
 
   function ensureAudio() {
     if (actx) return true;
     try {
       actx = new (window.AudioContext || window.webkitAudioContext)();
-      // gentle limiter so close cracks stay punchy without clipping
       busComp = actx.createDynamicsCompressor();
-      busComp.threshold.value = -16; busComp.knee.value = 24;
-      busComp.ratio.value = 8; busComp.attack.value = 0.003; busComp.release.value = 0.4;
+      busComp.threshold.value = -16; busComp.knee.value = 24; busComp.ratio.value = 8;
+      busComp.attack.value = 0.003; busComp.release.value = 0.4;
       busComp.connect(actx.destination);
-      // convolution reverb from a synthetic decaying-noise impulse — the tail
-      // is what makes thunder feel like it's rolling across a real sky
-      IR = makeIR(3.4, 2.4);
+      masterMix = actx.createGain();
+      masterMix.gain.value = muted ? 0 : VOLUME;
+      masterMix.connect(busComp);
+      // long, diffuse impulse so thunder rolls and lingers
+      IR = makeIR(5.5, 2.2);
       reverbBus = actx.createConvolver(); reverbBus.buffer = IR;
-      const rg = actx.createGain(); rg.gain.value = 0.85;
-      reverbBus.connect(rg); rg.connect(busComp);
+      const rg = actx.createGain(); rg.gain.value = 0.9;
+      reverbBus.connect(rg); rg.connect(masterMix);
       return true;
     } catch (_) { actx = null; return false; }
   }
-
   function makeIR(seconds, decay) {
-    const rate = actx.sampleRate;
-    const len = Math.floor(rate * seconds);
-    const buf = actx.createBuffer(2, len, rate);
-    for (let ch = 0; ch < 2; ch++) {
-      const d = buf.getChannelData(ch);
-      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
-    }
+    const rate = actx.sampleRate, len = Math.floor(rate * seconds), buf = actx.createBuffer(2, len, rate);
+    for (let ch = 0; ch < 2; ch++) { const d = buf.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay); }
     return buf;
   }
   function noiseBuffer(dur) {
-    const len = Math.max(1, Math.floor(actx.sampleRate * dur));
-    const buf = actx.createBuffer(1, len, actx.sampleRate);
-    const d = buf.getChannelData(0);
+    const len = Math.max(1, Math.floor(actx.sampleRate * dur)), buf = actx.createBuffer(1, len, actx.sampleRate), d = buf.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
     return buf;
+  }
+
+  function startRainBed() {
+    if (reduced || !ensureAudio() || rainSrc) return;
+    rainSrc = actx.createBufferSource(); rainSrc.buffer = noiseBuffer(2.2); rainSrc.loop = true;
+    rainFilter = actx.createBiquadFilter(); rainFilter.type = "bandpass"; rainFilter.frequency.value = 1600; rainFilter.Q.value = 0.35;
+    const lp = actx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 7000;
+    rainGain = actx.createGain(); rainGain.gain.value = 0.0001;
+    rainSrc.connect(rainFilter); rainFilter.connect(lp); lp.connect(rainGain); rainGain.connect(masterMix);
+    rainSrc.start();
+  }
+  function stopRainBed() {
+    if (!rainSrc) return;
+    const s = rainSrc; rainSrc = null;
+    try { rainGain.gain.setTargetAtTime(0.0001, actx.currentTime, 0.5); s.stop(actx.currentTime + 1.8); } catch (_) {}
   }
 
   function thunder(distance, mag) {
     if (reduced || !ensureAudio()) return;
     if (actx.state === "suspended") actx.resume();
     const now = actx.currentTime;
-    const delay = 0.04 + distance * distance * 5.2;         // sound lags the flash
+    const delay = 0.04 + distance * distance * 5.5;
     const t = now + delay;
-    const dur = 2.4 + (1 - distance) * 3.6 + Math.random() * 1.8;
-    const vol = clmp(VOLUME * (0.22 + (1 - distance) * 0.95) * mag, 0, 1.1);
+    // long tails — thunder that keeps rumbling well after the flash
+    const dur = 4.5 + (1 - distance) * 5.5 + Math.random() * 3;
+    const vol = clmp((0.22 + (1 - distance) * 0.95) * mag, 0, 1.1);
 
     const out = actx.createGain(); out.gain.value = vol;
-    out.connect(busComp); out.connect(reverbBus);
+    out.connect(masterMix); out.connect(reverbBus);
 
-    /* 1 — initial crack (only the closer strikes): sharp bright transient */
-    if (distance < 0.5) {
-      const cd = 0.2;
-      const cs = actx.createBufferSource(); cs.buffer = noiseBuffer(cd);
+    if (distance < 0.5) {                      // sharp initial crack
+      const cd = 0.22, cs = actx.createBufferSource(); cs.buffer = noiseBuffer(cd);
       const hp = actx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 850;
       const bp = actx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = rnd(1400, 2200); bp.Q.value = 0.7;
       const cg = actx.createGain();
@@ -287,35 +291,26 @@
       cs.start(t); cs.stop(t + cd);
     }
 
-    /* 2 — rolling rumble: two overlapping noise beds, lowpass sweeping down,
-           with irregular gain swells so the thunder "rolls" instead of fading */
-    for (let k = 0; k < 2; k++) {
-      const off = k * rnd(0.12, 0.55);
-      const bd = Math.max(0.6, dur - off);
+    for (let k = 0; k < 3; k++) {               // 3 overlapping rolling beds
+      const off = k * rnd(0.15, 0.7), bd = Math.max(0.8, dur - off);
       const ns = actx.createBufferSource(); ns.buffer = noiseBuffer(bd);
       const lp = actx.createBiquadFilter(); lp.type = "lowpass";
-      const startF = clmp(760 - distance * 340 - k * 120, 110, 900);
-      lp.frequency.setValueAtTime(startF, t + off);
-      lp.frequency.exponentialRampToValueAtTime(58, t + off + bd);
+      lp.frequency.setValueAtTime(clmp(760 - distance * 340 - k * 120, 100, 900), t + off);
+      lp.frequency.exponentialRampToValueAtTime(52, t + off + bd);
       const g = actx.createGain();
       g.gain.setValueAtTime(0.0001, t + off);
-      g.gain.exponentialRampToValueAtTime(0.85 * (1 - 0.3 * k), t + off + 0.07 + distance * 0.35);
+      g.gain.exponentialRampToValueAtTime(0.8 * (1 - 0.28 * k), t + off + 0.07 + distance * 0.35);
       let tt = t + off + 0.2;
-      while (tt < t + off + bd - 0.35) {
-        const lvl = clmp(rnd(0.12, 0.95) * (1 - 0.4 * k), 0.02, 1);
-        g.gain.exponentialRampToValueAtTime(lvl, tt);
-        tt += rnd(0.14, 0.5);
-      }
+      while (tt < t + off + bd - 0.4) { g.gain.exponentialRampToValueAtTime(clmp(rnd(0.1, 0.95) * (1 - 0.35 * k), 0.02, 1), tt); tt += rnd(0.16, 0.6); }
       g.gain.exponentialRampToValueAtTime(0.0001, t + off + bd);
       ns.connect(lp); lp.connect(g); g.connect(out);
       ns.start(t + off); ns.stop(t + off + bd);
     }
 
-    /* 3 — sub-bass swell: the chest-thump of a nearby strike */
-    const sd = Math.min(2.8, dur);
+    const sd = Math.min(3.2, dur);              // sub-bass swell
     const osc = actx.createOscillator(); osc.type = "sine";
     osc.frequency.setValueAtTime(rnd(48, 58), t);
-    osc.frequency.exponentialRampToValueAtTime(26, t + sd);
+    osc.frequency.exponentialRampToValueAtTime(24, t + sd);
     const og = actx.createGain();
     og.gain.setValueAtTime(0.0001, t);
     og.gain.exponentialRampToValueAtTime((1 - distance) * 0.7 + 0.05, t + 0.14);
@@ -324,22 +319,22 @@
     osc.start(t); osc.stop(t + sd + 0.05);
   }
 
+  function applyMute() {
+    mute.setAttribute("aria-pressed", muted ? "true" : "false");
+    mute.setAttribute("aria-label", muted ? "Unmute storm audio" : "Mute storm audio");
+    if (masterMix && actx) masterMix.gain.setTargetAtTime(muted ? 0.0001 : VOLUME, actx.currentTime, 0.08);
+  }
+
   /* ── state ────────────────────────────────────────────────────── */
-  let enabled = false;
-  let rafId = 0, last = 0, startTime = 0;
-  let cloud = 0, rain = 0;              // eased current values
-  let stormWave = 0.5, squall = 0, gustSign = 1, nextSquall = 0;
-  let wind = 0;
+  let enabled = false, rafId = 0, last = 0, startTime = 0;
+  let cloud = 0, rain = 0, stormWave = 0.5, squall = 0, gustSign = 1, nextSquall = 0, wind = 0;
 
   function loop(ts) {
     if (!last) last = ts;
     let dt = (ts - last) / 1000; last = ts;
     if (dt > 0.05) dt = 0.05;
-    const now = ts;
-    const elapsed = now - startTime;
-    const T = elapsed / 1000;
+    const now = ts, elapsed = now - startTime, T = elapsed / 1000;
 
-    /* storm intensity — a slow swell plus random squalls, never constant */
     if (enabled) {
       if (!nextSquall) nextSquall = now + rnd(4000, 12000);
       if (now > nextSquall) { squall = Math.max(squall, rnd(0.5, 1)); gustSign = Math.random() < 0.5 ? -1 : 1; nextSquall = now + rnd(12000, 28000); }
@@ -347,26 +342,34 @@
     squall = Math.max(0, squall - dt * 0.07);
     stormWave = clmp(0.46 + 0.3 * Math.sin(T * 0.05) + 0.15 * Math.sin(T * 0.021 + 1) + squall * 0.4, 0, 1);
 
-    /* targets */
     const targetCloud = enabled ? 1 : 0;
     let rampGate = 0;
     if (enabled && elapsed > RAIN_DELAY) rampGate = Math.min(1, (elapsed - RAIN_DELAY) / RAIN_RAMP);
     const targetRain = enabled ? rampGate * clmp(0.42 + 0.6 * stormWave, 0, 1) : 0;
 
-    cloud += (targetCloud - cloud) * (enabled ? 0.9 : 1.5) * dt;
+    // clouds gather slowly; rain responds a touch quicker
+    cloud += (targetCloud - cloud) * (enabled ? 0.5 : 1.5) * dt;
     rain  += (targetRain  - rain)  * (enabled ? 1.1 : 2.4) * dt;
     cloud = clmp(cloud, 0, 1); rain = clmp(rain, 0, 1);
 
-    /* gusting wind — stronger and leaning during squalls */
     wind = (Math.sin(T * 0.08) * 90 + Math.sin(T * 0.031 + 2) * 70) * (1 + squall * 1.3) + squall * 150 * gustSign;
 
-    /* lightning schedule (keeps going for the life of the storm) */
     if (enabled && !reduced) {
       if (nextStrike === Infinity && elapsed > STORM_LEAD) scheduleStrike(now, stormWave);
       if (now >= nextStrike) strike(now, stormWave);
     }
     flash = Math.max(0, flash - dt * 3.1);
     shake = Math.max(0, shake - dt * 22);
+
+    // rain audio level tracks intensity + heavier hiss during squalls
+    if (rainGain && actx) {
+      const target = (muted ? 0 : 1) * (0.02 + rain * 0.13);
+      rainGain.gain.setTargetAtTime(Math.max(0.0001, target), actx.currentTime, 0.25);
+      rainFilter.frequency.setTargetAtTime(1200 + rain * 1500, actx.currentTime, 0.4);
+    }
+
+    // portrait catches the lightning
+    if (portrait) portrait.style.filter = flash > 0.03 ? `brightness(${1 + flash * 0.7}) contrast(${1 + flash * 0.12})` : "";
 
     draw(dt, T);
 
@@ -375,6 +378,7 @@
     } else {
       ctx.clearRect(0, 0, W, H);
       canvas.classList.remove("is-on");
+      if (portrait) portrait.style.filter = "";
       rafId = 0; last = 0;
     }
   }
@@ -384,75 +388,73 @@
     ctx.save();
     if (shake > 0.1) ctx.translate(rnd(-shake, shake), rnd(-shake, shake));
 
-    /* ── storm ceiling: a heavy dark gradient pouring down from the top ── */
+    /* storm ceiling */
     if (cloud > 0.01) {
       const ceil = ctx.createLinearGradient(0, 0, 0, H * 0.6);
-      ceil.addColorStop(0, `rgba(6,8,13,${0.5 * cloud})`);
+      ceil.addColorStop(0, `rgba(6,8,13,${0.55 * cloud})`);
       ceil.addColorStop(1, "rgba(6,8,13,0)");
-      ctx.fillStyle = ceil;
-      ctx.fillRect(0, 0, W, H * 0.6);
+      ctx.fillStyle = ceil; ctx.fillRect(0, 0, W, H * 0.6);
     }
 
-    /* ── clouds ── */
+    /* clouds — descend into view while gathering, lit from within on flash */
     if (cloud > 0.01) {
       for (const c of clouds) {
         c.x += c.drift * dt;
         if (c.x < -c.r) c.x = W + c.r;
         if (c.x > W + c.r) c.x = -c.r;
-        const cy = c.y + Math.sin(T * 0.3 + c.bob) * c.bobAmp;
+        const baseY = c.yFrom + (c.yTo - c.yFrom) * cloud;
+        const cy = baseY + Math.sin(T * 0.3 + c.bob) * c.bobAmp;
         const g = ctx.createRadialGradient(c.x, cy, 0, c.x, cy, c.r);
-        const t = c.tone;
-        const lit = flash * (flashHue > 0.2 ? 70 : 120);   // lightning glows inside the cloud
-        g.addColorStop(0,    `rgba(${t + lit},${t + 6 + lit * 0.9},${t + 14 + lit * 0.55},${0.44 * cloud})`);
-        g.addColorStop(0.55, `rgba(${t - 4},${t},${t + 10},${0.28 * cloud})`);
+        const t = c.tone, litc = flash * (flashHue > 0.2 ? 80 : 140);
+        g.addColorStop(0,    `rgba(${t + litc},${t + 6 + litc * 0.9},${t + 14 + litc * 0.55},${0.30 * cloud})`);
+        g.addColorStop(0.45, `rgba(${t},${t + 4},${t + 12},${0.34 * cloud})`);
         g.addColorStop(1,    "rgba(0,0,0,0)");
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(c.x, cy, c.r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(c.x, cy, c.r, 0, Math.PI * 2); ctx.fill();
       }
     }
 
-    /* ── ground mist rising with the rain ── */
+    /* ground mist */
     if (rain > 0.1) {
       const mg = ctx.createLinearGradient(0, H, 0, H * 0.72);
-      const ma = 0.10 * rain;
-      mg.addColorStop(0, `rgba(150,170,200,${ma})`);
+      mg.addColorStop(0, `rgba(150,170,200,${0.10 * rain})`);
       mg.addColorStop(1, "rgba(150,170,200,0)");
-      ctx.fillStyle = mg;
-      ctx.fillRect(0, H * 0.72, W, H * 0.28);
+      ctx.fillStyle = mg; ctx.fillRect(0, H * 0.72, W, H * 0.28);
     }
 
-    /* ── rain ── */
+    /* rain — depth-bucketed, one stroke per bucket */
     if (rain > 0.005) {
       const want = Math.floor(MAX_DROPS * rain);
       let added = 0;
       while (drops.length < want && added < 16) { drops.push(spawnDrop(true)); added++; }
+      for (let i = 0; i < NB; i++) seg[i].length = 0;
 
       const groundY = H * 0.985;
-      ctx.lineCap = "round";
       for (let i = 0; i < drops.length; i++) {
         const d = drops[i];
         const vx = wind * (0.35 + d.depth * 0.95);
-        d.x += vx * dt;
-        d.y += d.speed * dt;
+        d.x += vx * dt; d.y += d.speed * dt;
         const dxn = (vx / d.speed) * d.len;
-        ctx.strokeStyle = `rgba(198,214,246,${d.a * (0.45 + rain * 0.55)})`;
-        ctx.lineWidth = d.w;
-        ctx.beginPath();
-        ctx.moveTo(d.x, d.y);
-        ctx.lineTo(d.x - dxn, d.y - d.len);
-        ctx.stroke();
-
+        const s = seg[d.b]; s.push(d.x, d.y, d.x - dxn, d.y - d.len);
         if (d.y >= groundY) {
-          if (d.depth > 0.32 && splashes.length < 440 && Math.random() < 0.92) addSplash(d.x, groundY, d.depth);
-          if (drops.length <= want) { const n = spawnDrop(true); Object.assign(d, n); }
+          // staggered impact band so splashes aren't a flat line
+          const band = groundY - rnd(0, H * 0.05) * (1 - d.depth);
+          if (d.depth > 0.32 && splashes.length < 440 && Math.random() < 0.9) addSplash(d.x, band, d.depth);
+          if (drops.length <= want) Object.assign(d, spawnDrop(true));
           else { drops.splice(i, 1); i--; }
         }
       }
+      const fade = 0.45 + rain * 0.55;
+      for (let b = 0; b < NB; b++) {
+        const s = seg[b]; if (!s.length) continue;
+        ctx.strokeStyle = `rgba(198,214,246,${bAlpha[b] * fade})`;
+        ctx.lineWidth = bWidth[b]; ctx.lineCap = "round"; ctx.beginPath();
+        for (let i = 0; i < s.length; i += 4) { ctx.moveTo(s[i], s[i + 1]); ctx.lineTo(s[i + 2], s[i + 3]); }
+        ctx.stroke();
+      }
 
-      /* near-camera streaks for depth + drama */
+      /* foreground streaks */
       for (let i = 0; i < fg.length; i++) {
-        const f = fg[i];
-        const vx = wind * 1.4;
+        const f = fg[i], vx = wind * 1.4;
         f.x += vx * dt; f.y += f.speed * dt;
         const dxn = (vx / f.speed) * f.len;
         const grd = ctx.createLinearGradient(f.x, f.y, f.x - dxn, f.y - f.len);
@@ -466,7 +468,33 @@
       drops.length = 0;
     }
 
-    /* ── splashes ── */
+    /* rain on the glass */
+    if (rain > 0.12) {
+      while (glass.length < GMAX && Math.random() < 0.25) glass.push(spawnGlassStatic());
+      for (let i = 0; i < glass.length; i++) {
+        const gd = glass[i];
+        if (gd.state === "cling") {
+          gd.hold -= dt;
+          if (gd.hold <= 0 && (gd.r > 4.2 || Math.random() < 0.01)) gd.state = "run";
+        } else {
+          gd.vy = Math.min(gd.vy + 320 * dt, 260 + gd.r * 18);
+          gd.y += gd.vy * dt;
+          gd.x += Math.sin(gd.y * 0.06 + gd.wob) * 12 * dt;
+          gd.trail += gd.vy * dt;
+          if (gd.trail > rnd(10, 24) && glass.length < GMAX + 20) {
+            gd.trail = 0; glass.push({ x: gd.x + rnd(-1, 1), y: gd.y - gd.r, r: gd.r * rnd(0.25, 0.5), vy: 0, state: "cling", hold: 99, wob: 0, trail: 0, resid: true });
+          }
+        }
+        drawGlassDrop(gd);
+        if (gd.y - gd.r > H) { glass.splice(i, 1); i--; }
+      }
+      // as the rain eases, let clinging drops evaporate
+      if (rain < 0.2 && glass.length && Math.random() < 0.2) glass.pop();
+    } else if (glass.length) {
+      glass.length = 0;
+    }
+
+    /* splashes + faint puddle reflection */
     if (splashes.length) {
       for (let i = 0; i < splashes.length; i++) {
         const s = splashes[i];
@@ -483,14 +511,21 @@
         }
       }
     }
+    if (flash > 0.04 && rain > 0.15) {   // lightning reflecting off the wet floor
+      ctx.globalCompositeOperation = "lighter";
+      const pg = ctx.createLinearGradient(0, H, 0, H * 0.9);
+      pg.addColorStop(0, `rgba(150,175,120,${0.12 * flash * rain})`);
+      pg.addColorStop(1, "rgba(150,175,120,0)");
+      ctx.fillStyle = pg; ctx.fillRect(0, H * 0.9, W, H * 0.1);
+      ctx.globalCompositeOperation = "source-over";
+    }
 
-    /* ── lightning bolts ── */
+    /* lightning bolts */
     if (bolts.length) {
       ctx.globalCompositeOperation = "lighter";
       ctx.lineCap = "round"; ctx.lineJoin = "round";
       for (let i = 0; i < bolts.length; i++) {
-        const b = bolts[i];
-        b.life -= dt * 3.0;
+        const b = bolts[i]; b.life -= dt * 3.0;
         if (b.life <= 0) { bolts.splice(i, 1); i--; continue; }
         const a = Math.max(0, b.life) * b.bright;
         ctx.shadowColor = ACCENT; ctx.shadowBlur = 30;
@@ -500,15 +535,13 @@
         ctx.strokeStyle = `rgba(246,255,236,${0.96 * a})`; ctx.lineWidth = 1.5;
         strokePath(b.pts); for (const br of b.branches) strokePath(br);
       }
-      ctx.shadowBlur = 0;
-      ctx.globalCompositeOperation = "source-over";
+      ctx.shadowBlur = 0; ctx.globalCompositeOperation = "source-over";
     }
 
-    /* ── flash wash over the whole scene ── */
+    /* full-scene flash */
     if (flash > 0.01) {
       ctx.globalCompositeOperation = "lighter";
-      const g = ctx.createLinearGradient(0, 0, 0, H);
-      const warm = flashHue;
+      const g = ctx.createLinearGradient(0, 0, 0, H), warm = flashHue;
       const rr = 150 + warm * 40, gg = 175 - warm * 30, bb = 130 - warm * 40;
       g.addColorStop(0,   `rgba(${rr},${gg},${bb},${0.18 * flash})`);
       g.addColorStop(0.5, `rgba(${rr - 30},${gg - 25},${bb - 20},${0.10 * flash})`);
@@ -520,9 +553,24 @@
     ctx.restore();
   }
 
+  function drawGlassDrop(gd) {
+    const r = gd.r;
+    // soft body
+    const g = ctx.createRadialGradient(gd.x - r * 0.3, gd.y - r * 0.3, r * 0.1, gd.x, gd.y, r);
+    g.addColorStop(0, `rgba(226,238,255,${0.16 + flash * 0.35})`);
+    g.addColorStop(0.6, "rgba(180,200,230,0.05)");
+    g.addColorStop(1, "rgba(120,140,175,0.12)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(gd.x, gd.y, r, 0, Math.PI * 2); ctx.fill();
+    // dark refractive rim
+    ctx.strokeStyle = "rgba(20,26,38,0.25)"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(gd.x, gd.y, r, 0, Math.PI * 2); ctx.stroke();
+    // specular highlight that glints on lightning
+    ctx.fillStyle = `rgba(255,255,255,${0.5 + flash * 0.5})`;
+    ctx.beginPath(); ctx.arc(gd.x - r * 0.32, gd.y - r * 0.32, Math.max(0.6, r * 0.18), 0, Math.PI * 2); ctx.fill();
+  }
+
   function strokePath(pts) {
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pts[0].y);
+    ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
     for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
     ctx.stroke();
   }
@@ -533,12 +581,14 @@
     enabled = true;
     startTime = performance.now();
     nextStrike = Infinity; nextSquall = 0; squall = 0;
-    buildFg();
+    buildFg(); glass.length = 0;
     btn.setAttribute("aria-pressed", "true");
-    sky.classList.add("is-on");
-    canvas.classList.add("is-on");
+    sky.classList.add("is-on"); grade.classList.add("is-on"); canvas.classList.add("is-on");
+    mute.classList.add("is-on");
+    document.body.classList.add("storm-active");
     try { localStorage.setItem(STORE_KEY, "1"); } catch (_) {}
-    ensureAudio(); if (actx && actx.state === "suspended") actx.resume();
+    if (ensureAudio() && actx.state === "suspended") actx.resume();
+    applyMute(); startRainBed();
     if (!rafId) { last = 0; rafId = requestAnimationFrame(loop); }
   }
 
@@ -546,8 +596,10 @@
     if (!enabled) return;
     enabled = false;
     btn.setAttribute("aria-pressed", "false");
-    sky.classList.remove("is-on");
+    sky.classList.remove("is-on"); grade.classList.remove("is-on"); mute.classList.remove("is-on");
+    document.body.classList.remove("storm-active");
     nextStrike = Infinity; bolts.length = 0;
+    stopRainBed();
     try { localStorage.setItem(STORE_KEY, "0"); } catch (_) {}
     if (!rafId) { last = 0; rafId = requestAnimationFrame(loop); }
   }
@@ -557,18 +609,22 @@
   /* ── wiring ───────────────────────────────────────────────────── */
   resize();
   window.addEventListener("resize", debounce(resize, 200));
+  if (window.visualViewport) window.visualViewport.addEventListener("resize", debounce(resize, 200));
+  window.addEventListener("orientationchange", () => setTimeout(resize, 250));
   btn.addEventListener("click", toggle);
+  mute.addEventListener("click", () => { muted = !muted; try { localStorage.setItem(MUTE_KEY, muted ? "1" : "0"); } catch (_) {} applyMute(); });
 
   document.addEventListener("keydown", (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
-    const el = document.activeElement;
-    if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
+    const a = document.activeElement;
+    if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
     if (e.key === "r" || e.key === "R") { e.preventDefault(); toggle(); }
+    else if ((e.key === "m" || e.key === "M") && enabled) { e.preventDefault(); muted = !muted; try { localStorage.setItem(MUTE_KEY, muted ? "1" : "0"); } catch (_) {} applyMute(); }
   });
 
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; last = 0; } }
-    else if ((enabled || cloud > 0.01 || rain > 0.01) && !rafId) { last = 0; rafId = requestAnimationFrame(loop); }
+    if (document.hidden) { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; last = 0; } if (actx && actx.state === "running") actx.suspend(); }
+    else { if (actx && enabled) actx.resume(); if ((enabled || cloud > 0.01 || rain > 0.01) && !rafId) { last = 0; rafId = requestAnimationFrame(loop); } }
   });
 
   try { if (localStorage.getItem(STORE_KEY) === "1") enable(); } catch (_) {}

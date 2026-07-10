@@ -796,10 +796,38 @@ html.skills-graph .skills__hint span { width: 6px; height: 6px; border-radius: 5
 }
 .rain-sky.is-on { opacity: 1; }
 
+/* storm colour-grade — cools + desaturates the scene beneath (blend, so it
+   never creates a containing block or disturbs layout / fixed overlays) */
+.rain-grade {
+  position: fixed; inset: 0; z-index: 6997; pointer-events: none; opacity: 0;
+  background: #46566e; mix-blend-mode: saturation;
+  transition: opacity 2.2s var(--ease);
+}
+.rain-grade.is-on { opacity: 0.4; }
+
 /* the drawing surface */
 .rain-canvas { position: fixed; inset: 0; z-index: 6999; pointer-events: none; opacity: 0; transition: opacity 1.2s var(--ease); }
 .rain-canvas.is-on { opacity: 1; }
 
+/* mute control — only present while the storm is running */
+.weather-mute {
+  position: fixed; right: 1rem; bottom: 1rem; z-index: 8600;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: none; place-items: center;
+  color: var(--fg); border: 1px solid var(--line);
+  background: rgba(10, 10, 14, 0.66); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  cursor: pointer; opacity: 0; transform: translateY(6px) scale(0.9);
+  transition: opacity .4s var(--ease), transform .4s var(--ease), color .3s, border-color .3s;
+}
+.weather-mute.is-on { display: grid; opacity: 1; transform: none; }
+.weather-mute:hover { color: var(--accent); border-color: var(--accent); }
+.weather-mute .wm-ic { width: 18px; height: 18px; }
+.weather-mute .wm-off { display: none; }
+.weather-mute[aria-pressed="true"] .wm-on  { display: none; }
+.weather-mute[aria-pressed="true"] .wm-off { display: block; }
+.weather-mute[aria-pressed="true"] { color: var(--muted); }
+
 @media (max-width: 768px) {
   .weather-toggle { height: 1.9rem; padding: 0 0.7rem; }
+  .weather-mute { width: 36px; height: 36px; right: 0.8rem; bottom: 0.8rem; }
 }
