@@ -216,6 +216,10 @@
   if (location.hash === "#vault") setTimeout(open, 600);
   window.addEventListener("hashchange", () => { if (location.hash === "#vault") open(); });
 
+  // footer breadcrumb → open the vault
+  const wire = () => { const h = document.getElementById("vaultHint"); if (h) h.addEventListener("click", open); };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
+
   // type "vault" anywhere (not in a field) to open
   let buf = "";
   document.addEventListener("keydown", (e) => {

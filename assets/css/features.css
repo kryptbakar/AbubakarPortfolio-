@@ -273,3 +273,27 @@ body.mmenu-lock { overflow: hidden; }
   .hero__coords { display: none; }
   .contact__head { font-size: clamp(1.9rem, 11vw, 3rem); }
 }
+
+/* ══ VAULT HINT (footer breadcrumb) ═══════════════════════════════ */
+.footer__hint-row { display: flex; justify-content: center; margin: 0.4rem 0 1.4rem; }
+.vault-hint {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  padding: 0.5rem 1rem; border: 1px dashed var(--line); border-radius: 999px;
+  background: none; color: var(--faint); cursor: pointer;
+  font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+  transition: color .3s var(--ease), border-color .3s var(--ease), background .3s var(--ease);
+}
+.vault-hint:hover, .vault-hint:focus-visible {
+  color: var(--accent); border-color: rgba(201,242,78,0.45); border-style: solid;
+  background: rgba(201,242,78,0.05); outline: none;
+}
+.vault-hint b { color: var(--muted); font-weight: 500; transition: color .3s var(--ease); }
+.vault-hint:hover b, .vault-hint:focus-visible b { color: var(--accent); }
+.vault-hint__lock { filter: grayscale(1) opacity(0.55); transition: filter .3s var(--ease); font-size: 0.85em; }
+.vault-hint:hover .vault-hint__lock { filter: none; }
+.vault-hint__txt--done { display: none; }
+/* once solved, flip the breadcrumb to a subtle "breached" state */
+html.vault-breached .vault-hint { color: var(--accent); border-color: rgba(201,242,78,0.4); border-style: solid; }
+html.vault-breached .vault-hint__lock { filter: none; }
+html.vault-breached .vault-hint__txt--locked { display: none; }
+html.vault-breached .vault-hint__txt--done { display: inline; }
